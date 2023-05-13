@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Services;
+using TodoApp.Domain.Entities;
 
 namespace TodoApp.Infrastructure.Authentication;
 
@@ -19,7 +20,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 		_jwtTokenOptions = jwtTokenOptions.Value;
 	}
 
-	public string GenerateToken(Guid id, string firstName, string lastName)
+	public string GenerateToken(User user)
 	{
 		var signingCredentials = new SigningCredentials(
 				new SymmetricSecurityKey(
@@ -29,9 +30,9 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
 		var claims = new[]
 		{
-			new Claim(JwtRegisteredClaimNames.Sub, id.ToString()),
-			new Claim(JwtRegisteredClaimNames.GivenName, firstName),
-			new Claim(JwtRegisteredClaimNames.FamilyName, lastName),
+			new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+			new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
+			new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
 			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 		};
 
