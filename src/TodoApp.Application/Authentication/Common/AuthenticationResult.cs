@@ -1,6 +1,6 @@
 using TodoApp.Domain.Entities;
 
-namespace TodoApp.Application.Services.Authentication.Common;
+namespace TodoApp.Application.Authentication.Common;
 
 public record AuthenticationResult(
 		User User,

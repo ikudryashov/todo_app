@@ -1,8 +1,8 @@
 using System.Net;
 
-namespace TodoApp.Application.Common.Exceptions.Authentication;
+namespace TodoApp.Domain.Exceptions.User.Authentication;
 
-public class InvalidCredentialsException : Exception, IServiceException
+public class InvalidCredentialsException : Exception, IAuthenticationException
 {
 	public HttpStatusCode StatusCode => HttpStatusCode.Unauthorized;
 	public string ErrorMessage => "Invalid credentials provided.";

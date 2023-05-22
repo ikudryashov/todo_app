@@ -1,7 +1,8 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TodoApp.Application.Services.Authentication.Commands;
-using TodoApp.Application.Services.Authentication.Common;
-using TodoApp.Application.Services.Authentication.Queries;
+using TodoApp.Application.Authentication.Commands.SignUp;
+using TodoApp.Application.Authentication.Common;
+using TodoApp.Application.Authentication.Queries.Login;
 using TodoApp.TodoApi.Contracts;
 using TodoApp.TodoApi.Contracts.Authentication;
 
@@ -10,26 +11,23 @@ namespace TodoApp.TodoApi.Controllers;
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-	private readonly IAuthenticationCommandService _authenticationCommandService;
-	private readonly IAuthenticationQueryService _authenticationQueryService;
+	private readonly IMediator _mediator;
 
-	public AuthenticationController(
-		IAuthenticationCommandService authenticationCommandService,
-		IAuthenticationQueryService authenticationQueryService)
+	public AuthenticationController(IMediator mediator)
 	{
-		_authenticationCommandService = authenticationCommandService;
-		_authenticationQueryService = authenticationQueryService;
+		_mediator = mediator;
 	}
 
 	[HttpPost("/auth/signup")]
-	public IActionResult SignUp(SignUpRequest request)
+	public async Task<IActionResult> SignUp(SignUpRequest request)
 	{
-		var authResult =
-			_authenticationCommandService.SignUpCommand(
-				request.FirstName, 
-				request.LastName, 
-				request.Email, 
-				request.Password);
+		var command = new SignUpCommand(
+			request.FirstName,
+			request.LastName,
+			request.Email,
+			request.Password);
+
+		var authResult = await _mediator.Send(command);
 
 		var response = MapAuthenticationResult(authResult);
 		
@@ -37,12 +35,10 @@ public class AuthenticationController : ControllerBase
 	}
 	
 	[HttpPost("/auth/login")]
-	public IActionResult LogIn(LogInRequest request)
+	public async Task<IActionResult> LogIn(LogInRequest request)
 	{
-		var authResult =
-			_authenticationQueryService.LogInQuery(
-				request.Email, 
-				request.Password);
+		var query = new LogInQuery(request.Email, request.Password);
+		var authResult = await _mediator.Send(query);
 
 		var response = MapAuthenticationResult(authResult);
 		

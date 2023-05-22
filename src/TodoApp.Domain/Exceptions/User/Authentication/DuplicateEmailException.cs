@@ -1,8 +1,8 @@
 using System.Net;
 
-namespace TodoApp.Application.Common.Exceptions.Authentication;
+namespace TodoApp.Domain.Exceptions.User.Authentication;
 
-public class DuplicateEmailException : Exception, IServiceException
+public class DuplicateEmailException : Exception, IAuthenticationException
 {
 	public HttpStatusCode StatusCode => HttpStatusCode.BadRequest;
 	public string ErrorMessage => "This email is already registered";
