@@ -20,7 +20,7 @@ public class AuthenticationService : IAuthenticationService
 	{
 		if (_userRepository.GetUserByEmail(email) is not null)
 		{
-			throw new DuplicateEmailException("A user with this email already exists.");
+			throw new DuplicateEmailException();
 		}
 
 		//create user
@@ -48,7 +48,7 @@ public class AuthenticationService : IAuthenticationService
 		if (_userRepository.GetUserByEmail(email) is not User user ||
 		    user.Password != password)
 		{
-			throw new InvalidCredentialsException("Invalid credentials provided.");
+			throw new InvalidCredentialsException();
 		}
 
 		//generate token

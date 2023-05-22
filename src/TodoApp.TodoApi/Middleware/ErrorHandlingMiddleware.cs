@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using TodoApp.Application.Common.Exceptions.Authentication;
+using TodoApp.Application.Common.Exceptions;
 
 namespace TodoApp.TodoApi.Middleware;
 
@@ -27,13 +27,13 @@ public class ErrorHandlingMiddleware
 
 	private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
 	{
-		var (title, status, detail, type) = exception switch
+		var (title, status, detail) = exception switch
 		{
-			DuplicateEmailException => (
-				"Failed to create account", StatusCodes.Status400BadRequest, exception.Message, "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"),
-			InvalidCredentialsException => (
-				"Failed to log in", StatusCodes.Status401Unauthorized, exception.Message, "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3"),
-			_ => ("Internal Server Error", StatusCodes.Status500InternalServerError, exception.Message, "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1")
+			IServiceException serviceException => (
+				"Authentication failed", (int)serviceException.StatusCode, serviceException.ErrorMessage),
+			
+			_ => ("Internal Server Error", StatusCodes.Status500InternalServerError, 
+				"Unexpected error occured. Please try again later.")
 		};
 
 		var problemDetails = new ProblemDetails()
@@ -42,7 +42,6 @@ public class ErrorHandlingMiddleware
 			Status = status,
 			Detail = detail,
 			Title = title,
-			Type = type
 		};
 
 		context.Response.StatusCode = problemDetails.Status.Value;
