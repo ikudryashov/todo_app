@@ -1,22 +1,23 @@
 using TodoApp.Application.Common.Exceptions.Authentication;
 using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Persistence;
+using TodoApp.Application.Services.Authentication.Common;
 using TodoApp.Domain.Entities;
 
-namespace TodoApp.Application.Services.Authentication;
+namespace TodoApp.Application.Services.Authentication.Commands;
 
-public class AuthenticationService : IAuthenticationService
+public class AuthenticationCommandService : IAuthenticationCommandService
 {
 	private readonly IJwtTokenGenerator _jwtTokenGenerator;
 	private readonly IUserRepository _userRepository;
 
-	public AuthenticationService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
+	public AuthenticationCommandService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
 	{
 		_jwtTokenGenerator = jwtTokenGenerator;
 		_userRepository = userRepository;
 	}
 
-	public AuthenticationResult SignUp(string firstName, string lastName, string email, string password)
+	public AuthenticationResult SignUpCommand(string firstName, string lastName, string email, string password)
 	{
 		if (_userRepository.GetUserByEmail(email) is not null)
 		{
@@ -40,22 +41,5 @@ public class AuthenticationService : IAuthenticationService
 		var token = _jwtTokenGenerator.GenerateToken(user);
 		
 		return new AuthenticationResult(user, token);
-	}
-
-	public AuthenticationResult LogIn(string email, string password)
-	{
-
-		if (_userRepository.GetUserByEmail(email) is not User user ||
-		    user.Password != password)
-		{
-			throw new InvalidCredentialsException();
-		}
-
-		//generate token
-		var token = _jwtTokenGenerator.GenerateToken(user);
-		
-		return new AuthenticationResult(
-			user, 
-			token);
 	}
 }
