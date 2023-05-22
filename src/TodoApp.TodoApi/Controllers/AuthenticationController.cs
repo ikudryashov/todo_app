@@ -25,13 +25,7 @@ public class AuthenticationController : ControllerBase
 				request.Email, 
 				request.Password);
 
-		var response = new AuthResponse(
-				authResult.User.Id,
-				authResult.User.FirstName,
-				authResult.User.LastName,
-				authResult.User.Email,
-				authResult.Token
-			);
+		var response = MapAuthenticationResult(authResult);
 		
 		return Ok(response);
 	}
@@ -44,14 +38,20 @@ public class AuthenticationController : ControllerBase
 				request.Email, 
 				request.Password);
 
-		var response = new AuthResponse(
-			authResult.User.Id,
-			authResult.User.FirstName,
-			authResult.User.LastName,
-			authResult.User.Email,
-			authResult.Token
-		);
+		var response = MapAuthenticationResult(authResult);
 		
 		return Ok(response);
 	}
+
+	private AuthResponse MapAuthenticationResult(AuthenticationResult result)
+	{
+		return new AuthResponse(
+			result.User.Id,
+			result.User.FirstName,
+			result.User.LastName,
+			result.User.Email,
+			result.Token
+		);
+	}
+	
 }

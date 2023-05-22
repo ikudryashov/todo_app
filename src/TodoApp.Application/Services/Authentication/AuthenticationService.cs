@@ -1,3 +1,4 @@
+using TodoApp.Application.Common.Exceptions.Authentication;
 using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Persistence;
 using TodoApp.Domain.Entities;
@@ -17,10 +18,9 @@ public class AuthenticationService : IAuthenticationService
 
 	public AuthenticationResult SignUp(string firstName, string lastName, string email, string password)
 	{
-		//ensure the user does not exist
 		if (_userRepository.GetUserByEmail(email) is not null)
 		{
-			throw new Exception("user with given email already exists");
+			throw new DuplicateEmailException("A user with this email already exists.");
 		}
 
 		//create user
@@ -44,18 +44,13 @@ public class AuthenticationService : IAuthenticationService
 
 	public AuthenticationResult LogIn(string email, string password)
 	{
-		//ensure the user exists
-		if (_userRepository.GetUserByEmail(email) is not User user)
+
+		if (_userRepository.GetUserByEmail(email) is not User user ||
+		    user.Password != password)
 		{
-			throw new Exception("user with given email does not exist");
+			throw new InvalidCredentialsException("Invalid credentials provided.");
 		}
 
-		//validate password
-		if (user.Password != password)
-		{
-			throw new Exception("given password was incorrect");
-		}
-		
 		//generate token
 		var token = _jwtTokenGenerator.GenerateToken(user);
 		
