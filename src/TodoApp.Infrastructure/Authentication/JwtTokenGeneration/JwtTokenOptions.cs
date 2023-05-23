@@ -1,4 +1,4 @@
-namespace TodoApp.Infrastructure.Authentication;
+namespace TodoApp.Infrastructure.Authentication.JwtTokenGeneration;
 
 public class JwtTokenOptions
 {

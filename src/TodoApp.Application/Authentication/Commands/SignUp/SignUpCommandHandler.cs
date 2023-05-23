@@ -10,12 +10,14 @@ namespace TodoApp.Application.Authentication.Commands.SignUp;
 public class SignUpCommandHandler : IRequestHandler<SignUpCommand, AuthenticationResult>
 {
 	private readonly IJwtTokenGenerator _jwtTokenGenerator;
+	private readonly IPasswordHasher _passwordHasher;
 	private readonly IUserRepository _userRepository;
 
-	public SignUpCommandHandler(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
+	public SignUpCommandHandler(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository, IPasswordHasher passwordHasher)
 	{
 		_jwtTokenGenerator = jwtTokenGenerator;
 		_userRepository = userRepository;
+		_passwordHasher = passwordHasher;
 	}
 
 	public async Task<AuthenticationResult> Handle(SignUpCommand command, CancellationToken cancellationToken)
@@ -26,13 +28,16 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, Authenticatio
 		}
 
 		//create user
+		var hashResult = _passwordHasher.HashPassword(command.Password);
+		
 		var user = new User()
 		{
 			Id = Guid.NewGuid(),
 			FirstName = command.FirstName,
 			LastName = command.LastName,
 			Email = command.Email,
-			Password = command.Password
+			Password = hashResult.hash,
+			Salt =  hashResult.salt
 		};
 		
 		//persist user

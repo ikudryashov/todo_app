@@ -4,6 +4,8 @@ using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Persistence;
 using TodoApp.Application.Common.Interfaces.Services;
 using TodoApp.Infrastructure.Authentication;
+using TodoApp.Infrastructure.Authentication.JwtTokenGeneration;
+using TodoApp.Infrastructure.Authentication.PasswordHashing;
 using TodoApp.Infrastructure.Persistence;
 using TodoApp.Infrastructure.Services;
 
@@ -17,6 +19,7 @@ public static class DependencyInjection
 		services.AddScoped<IUserRepository, UserRepository>();
 		services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 		services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+		services.AddSingleton<IPasswordHasher, PasswordHasher>();
 		return services;
 	}
 }

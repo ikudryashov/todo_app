@@ -7,7 +7,7 @@ using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Services;
 using TodoApp.Domain.Entities;
 
-namespace TodoApp.Infrastructure.Authentication;
+namespace TodoApp.Infrastructure.Authentication.JwtTokenGeneration;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
