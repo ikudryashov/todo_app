@@ -1,8 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TodoApp.Application.Authentication.Commands.Refresh;
 using TodoApp.Application.Authentication.Commands.SignUp;
 using TodoApp.Application.Authentication.Common;
-using TodoApp.Application.Authentication.Queries.Login;
+using TodoApp.Application.Authentication.Queries.LogIn;
 using TodoApp.TodoApi.Contracts;
 using TodoApp.TodoApi.Contracts.Authentication;
 
@@ -45,6 +46,16 @@ public class AuthenticationController : ControllerBase
 		return Ok(response);
 	}
 
+	[HttpPost("/auth/refresh")]
+	public async Task<IActionResult> RefreshToken([FromBody] RefreshRequest request)
+	{
+		var command = new RefreshCommand(request.RefreshToken);
+		var authResult = await _mediator.Send(command);
+		
+		var response = MapAuthenticationResult(authResult);
+		return Ok(response);
+	}
+
 	private AuthResponse MapAuthenticationResult(AuthenticationResult result)
 	{
 		return new AuthResponse(
@@ -52,7 +63,8 @@ public class AuthenticationController : ControllerBase
 			result.User.FirstName,
 			result.User.LastName,
 			result.User.Email,
-			result.Token
+			result.Token,
+			result.User.RefreshToken
 		);
 	}
 	

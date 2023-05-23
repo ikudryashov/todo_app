@@ -29,6 +29,7 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, Authenticatio
 
 		//create user
 		var hashResult = _passwordHasher.HashPassword(command.Password);
+		var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
 		
 		var user = new User()
 		{
@@ -37,15 +38,17 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, Authenticatio
 			LastName = command.LastName,
 			Email = command.Email,
 			Password = hashResult.hash,
-			Salt =  hashResult.salt
+			Salt =  hashResult.salt,
+			RefreshToken = refreshToken.Token,
+			RefreshTokenExpiryDate = refreshToken.ExpiryDate
 		};
 		
 		//persist user
 		_userRepository.CreateUser(user);
 		
-		//generate token
-		var token = _jwtTokenGenerator.GenerateToken(user);
+		//generate jwt token
+		var jwtToken = _jwtTokenGenerator.GenerateToken(user);
 		
-		return new AuthenticationResult(user, token);
+		return new AuthenticationResult(user, jwtToken);
 	}
 }

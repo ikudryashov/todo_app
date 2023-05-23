@@ -5,7 +5,7 @@ using TodoApp.Application.Common.Interfaces.Persistence;
 using TodoApp.Domain.Entities;
 using TodoApp.Domain.Exceptions.User.Authentication;
 
-namespace TodoApp.Application.Authentication.Queries.Login;
+namespace TodoApp.Application.Authentication.Queries.LogIn;
 
 public class LogInQueryHandler : IRequestHandler<LogInQuery, AuthenticationResult>
 {
@@ -29,10 +29,17 @@ public class LogInQueryHandler : IRequestHandler<LogInQuery, AuthenticationResul
 		}
 
 		//generate token
-		var token = _jwtTokenGenerator.GenerateToken(user);
+		var jwtToken = _jwtTokenGenerator.GenerateToken(user);
+		var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
 		
+		//update the refresh token for this user in the persistence layer
+		user.RefreshToken = refreshToken.Token;
+		user.RefreshTokenExpiryDate = refreshToken.ExpiryDate;
+
+		_userRepository.UpdateUser(user);
+
 		return new AuthenticationResult(
 			user, 
-			token);
+			jwtToken);
 	}
 }

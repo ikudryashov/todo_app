@@ -1,8 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using TodoApp.Application.Authentication.Common;
 using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Services;
 using TodoApp.Domain.Entities;
@@ -45,5 +47,14 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 			);
 
 		return new JwtSecurityTokenHandler().WriteToken(token);
+	}
+
+	public RefreshToken GenerateRefreshToken()
+	{
+		return new RefreshToken()
+		{
+			Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(60)),
+			ExpiryDate = _dateTimeProvider.UtcNow.AddDays(_jwtTokenOptions.RefreshTokenExpiryDays)
+		};
 	}
 }

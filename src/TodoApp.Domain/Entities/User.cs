@@ -8,4 +8,6 @@ public class User
 	public string Email { get; set; } = null!;
 	public string Password { get; set; } = null!;
 	public string Salt { get; set; } = null!;
+	public string RefreshToken { get; set; } = null!;
+	public DateTime RefreshTokenExpiryDate { get; set; }
 }
