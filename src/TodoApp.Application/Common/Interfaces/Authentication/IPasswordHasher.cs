@@ -4,6 +4,6 @@ namespace TodoApp.Application.Common.Interfaces.Authentication;
 
 public interface IPasswordHasher
 {
-	public (string hash, byte[] salt)  HashPassword(string password);
-	public bool VerifyPassword(string password, string hash, byte[] salt);
+	public (string hash, string salt)  HashPassword(string password);
+	public bool VerifyPassword(string password, string hash, string salt);
 }

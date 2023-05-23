@@ -11,7 +11,7 @@ public class PasswordHasher : IPasswordHasher
 	private const int Iterations = 35000;
 	private readonly HashAlgorithmName _hashAlgorithm = HashAlgorithmName.SHA512;
 
-	public (string hash, byte[] salt) HashPassword(string password)
+	public (string hash, string salt) HashPassword(string password)
 	{
 		byte[] salt = RandomNumberGenerator.GetBytes(KeySize);
 
@@ -22,18 +22,18 @@ public class PasswordHasher : IPasswordHasher
 			_hashAlgorithm,
 			KeySize);
 
-		return (Convert.ToHexString(hash), salt);
+		return (Convert.ToBase64String(hash), Convert.ToBase64String(salt));
 	}
 
-	public bool VerifyPassword(string password, string hash, byte[] salt)
+	public bool VerifyPassword(string password, string hash, string salt)
 	{
 		var newHash = Rfc2898DeriveBytes.Pbkdf2(
 			Encoding.UTF8.GetBytes(password),
-			salt,
+			Convert.FromBase64String(salt),
 			Iterations,
 			_hashAlgorithm,
 			KeySize);
 
-		return CryptographicOperations.FixedTimeEquals(newHash, Convert.FromHexString(hash));
+		return CryptographicOperations.FixedTimeEquals(newHash, Convert.FromBase64String(hash));
 	}
 }
