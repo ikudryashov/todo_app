@@ -2,6 +2,7 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TodoApp.Application.Authentication.Commands.LogOut;
 using TodoApp.Application.Authentication.Commands.Refresh;
 using TodoApp.Application.Authentication.Commands.SignUp;
 using TodoApp.Application.Authentication.Common;
@@ -61,6 +62,18 @@ public class AuthenticationController : ControllerBase
 		
 		var response = MapAuthenticationResult(authResult);
 		return Ok(response);
+	}
+
+	[HttpPost("/auth/logout")]
+	public async Task<IActionResult> LogOut([FromBody] LogOutRequest request)
+	{
+		var context = HttpContext;
+		var claimedId = GetUserId(context);
+
+		var command = new LogOutCommand(Guid.Parse(claimedId), request.RefreshToken);
+		await _mediator.Send(command);
+
+		return NoContent();
 	}
 
 	private AuthResponse MapAuthenticationResult(AuthenticationResult result)
