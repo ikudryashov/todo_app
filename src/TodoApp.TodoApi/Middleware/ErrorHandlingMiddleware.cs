@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using TodoApp.Domain.Exceptions.User.Authentication;
+using TodoApp.Domain.Exceptions.Common.Interfaces;
 
 namespace TodoApp.TodoApi.Middleware;
 
@@ -29,8 +29,11 @@ public class ErrorHandlingMiddleware
 	{
 		var (title, status, detail) = exception switch
 		{
-			IAuthenticationException serviceException => (
-				"Authentication failed", (int)serviceException.StatusCode, serviceException.ErrorMessage),
+			IAuthenticationException authException => (
+				"Authentication failed", (int)authException.StatusCode, authException.ErrorMessage),
+			
+			IUserException userException => (
+				"User not found.", (int)userException.StatusCode, userException.ErrorMessage),
 			
 			_ => ("Internal Server Error", StatusCodes.Status500InternalServerError, 
 				"Unexpected error occured. Please try again later.")

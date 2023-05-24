@@ -10,36 +10,43 @@ namespace TodoApp.Application.Authentication.Queries.LogIn;
 public class LogInQueryHandler : IRequestHandler<LogInQuery, AuthenticationResult>
 {
 	private readonly IJwtTokenGenerator _jwtTokenGenerator;
-	private readonly IPasswordHasher _passwordHasher;
+	private readonly ICredentialsHasher _credentialsHasher;
 	private readonly IUserRepository _userRepository;
+	private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-	public LogInQueryHandler(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository, IPasswordHasher passwordHasher)
+	public LogInQueryHandler(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository, ICredentialsHasher credentialsHasher, IRefreshTokenRepository refreshTokenRepository)
 	{
 		_jwtTokenGenerator = jwtTokenGenerator;
 		_userRepository = userRepository;
-		_passwordHasher = passwordHasher;
+		_credentialsHasher = credentialsHasher;
+		_refreshTokenRepository = refreshTokenRepository;
 	}
 
 	public async Task<AuthenticationResult> Handle(LogInQuery query, CancellationToken cancellationToken)
 	{
-		if (_userRepository.GetUserByEmail(query.Email) is not User user ||
-		    !_passwordHasher.VerifyPassword(query.Password, user.Password, user.Salt))
+		if (await _userRepository.GetUserByEmail(query.Email) is not User user ||
+		    !_credentialsHasher.Verify(query.Password, user.Password, user.Salt))
 		{
 			throw new InvalidCredentialsException();
 		}
 
-		//generate token
-		var jwtToken = _jwtTokenGenerator.GenerateToken(user);
-		var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+		//generate tokens
+		var accessToken = _jwtTokenGenerator.GenerateToken(user);
+		var refreshToken = _jwtTokenGenerator.GenerateRefreshToken(user.Id);
 		
-		//update the refresh token for this user in the persistence layer
-		user.RefreshToken = refreshToken.Token;
-		user.RefreshTokenExpiryDate = refreshToken.ExpiryDate;
+		var plaintextRefreshToken = refreshToken.Token;
+		var hashedRefreshToken = _credentialsHasher.Hash(refreshToken.Token);
 
-		_userRepository.UpdateUser(user);
+		refreshToken.Token = hashedRefreshToken.hash;
+		refreshToken.Salt = hashedRefreshToken.salt;
+		
+		await _refreshTokenRepository.UpdateRefreshToken(refreshToken);
 
+		refreshToken.Token = plaintextRefreshToken;
+		
 		return new AuthenticationResult(
 			user, 
-			jwtToken);
+			accessToken,
+			refreshToken.Token);
 	}
 }

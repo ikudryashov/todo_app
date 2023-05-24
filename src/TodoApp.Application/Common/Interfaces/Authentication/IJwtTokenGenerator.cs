@@ -6,5 +6,5 @@ namespace TodoApp.Application.Common.Interfaces.Authentication;
 public interface IJwtTokenGenerator
 {
 	public string GenerateToken(User user);
-	public RefreshToken GenerateRefreshToken();
+	public RefreshToken GenerateRefreshToken(Guid userId);
 }

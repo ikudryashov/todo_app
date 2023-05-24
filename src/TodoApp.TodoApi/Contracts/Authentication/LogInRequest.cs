@@ -1,4 +1,4 @@
-namespace TodoApp.TodoApi.Contracts;
+namespace TodoApp.TodoApi.Contracts.Authentication;
 
 public record LogInRequest(
 		string Email,

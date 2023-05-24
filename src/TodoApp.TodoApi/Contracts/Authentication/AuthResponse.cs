@@ -1,10 +1,10 @@
-namespace TodoApp.TodoApi.Contracts;
+namespace TodoApp.TodoApi.Contracts.Authentication;
 
 public record AuthResponse(
 		Guid Id,
 		string FirstName,
 		string LastName,
 		string Email,
-		string Token,
+		string AccessToken,
 		string RefreshToken
 	);

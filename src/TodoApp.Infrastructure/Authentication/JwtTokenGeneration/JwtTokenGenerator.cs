@@ -49,12 +49,14 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 		return new JwtSecurityTokenHandler().WriteToken(token);
 	}
 
-	public RefreshToken GenerateRefreshToken()
+	public RefreshToken GenerateRefreshToken(Guid userId)
 	{
 		return new RefreshToken()
 		{
+			UserId = userId,
 			Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(60)),
-			ExpiryDate = _dateTimeProvider.UtcNow.AddDays(_jwtTokenOptions.RefreshTokenExpiryDays)
+			ExpiryDate = _dateTimeProvider.UtcNow.AddDays(_jwtTokenOptions.RefreshTokenExpiryDays),
+			IsValid = true
 		};
 	}
 }

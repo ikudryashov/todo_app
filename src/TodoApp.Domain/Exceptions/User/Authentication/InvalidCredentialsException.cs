@@ -1,4 +1,5 @@
 using System.Net;
+using TodoApp.Domain.Exceptions.Common.Interfaces;
 
 namespace TodoApp.Domain.Exceptions.User.Authentication;
 

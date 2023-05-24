@@ -1,15 +1,18 @@
+using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TodoApp.Application.Authentication.Commands.Refresh;
 using TodoApp.Application.Authentication.Commands.SignUp;
 using TodoApp.Application.Authentication.Common;
 using TodoApp.Application.Authentication.Queries.LogIn;
-using TodoApp.TodoApi.Contracts;
+using TodoApp.Domain.Exceptions.User.Authentication;
 using TodoApp.TodoApi.Contracts.Authentication;
 
 namespace TodoApp.TodoApi.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 public class AuthenticationController : ControllerBase
 {
 	private readonly IMediator _mediator;
@@ -49,7 +52,11 @@ public class AuthenticationController : ControllerBase
 	[HttpPost("/auth/refresh")]
 	public async Task<IActionResult> RefreshToken([FromBody] RefreshRequest request)
 	{
-		var command = new RefreshCommand(request.RefreshToken);
+		var context = HttpContext;
+		var claimedId = GetUserId(context);
+
+		var command = new RefreshCommand(Guid.Parse(claimedId), request.RefreshToken);
+		
 		var authResult = await _mediator.Send(command);
 		
 		var response = MapAuthenticationResult(authResult);
@@ -63,9 +70,16 @@ public class AuthenticationController : ControllerBase
 			result.User.FirstName,
 			result.User.LastName,
 			result.User.Email,
-			result.Token,
-			result.User.RefreshToken
+			result.AccessToken,
+			result.RefreshToken
 		);
+	}
+	
+	private string GetUserId(HttpContext context)
+	{
+		var subClaim = context.User.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
+		if (subClaim?.Value is null) throw new InvalidCredentialsException();
+		return subClaim.Value;
 	}
 	
 }

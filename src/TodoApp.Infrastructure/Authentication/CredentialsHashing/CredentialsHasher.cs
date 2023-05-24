@@ -1,22 +1,21 @@
 using System.Security.Cryptography;
 using System.Text;
-using TodoApp.Application.Authentication.Common;
 using TodoApp.Application.Common.Interfaces.Authentication;
 
-namespace TodoApp.Infrastructure.Authentication.PasswordHashing;
+namespace TodoApp.Infrastructure.Authentication.CredentialsHashing;
 
-public class PasswordHasher : IPasswordHasher
+public class CredentialsHasher : ICredentialsHasher
 {
 	private const int KeySize = 64;
 	private const int Iterations = 35000;
 	private readonly HashAlgorithmName _hashAlgorithm = HashAlgorithmName.SHA512;
 
-	public (string hash, string salt) HashPassword(string password)
+	public (string hash, string salt) Hash(string plaintext)
 	{
 		byte[] salt = RandomNumberGenerator.GetBytes(KeySize);
 
 		var hash = Rfc2898DeriveBytes.Pbkdf2(
-			Encoding.UTF8.GetBytes(password),
+			Encoding.UTF8.GetBytes(plaintext),
 			salt,
 			Iterations,
 			_hashAlgorithm,
@@ -25,10 +24,10 @@ public class PasswordHasher : IPasswordHasher
 		return (Convert.ToBase64String(hash), Convert.ToBase64String(salt));
 	}
 
-	public bool VerifyPassword(string password, string hash, string salt)
+	public bool Verify(string plaintext, string hash, string salt)
 	{
 		var newHash = Rfc2898DeriveBytes.Pbkdf2(
-			Encoding.UTF8.GetBytes(password),
+			Encoding.UTF8.GetBytes(plaintext),
 			Convert.FromBase64String(salt),
 			Iterations,
 			_hashAlgorithm,

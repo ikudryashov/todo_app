@@ -10,26 +10,27 @@ namespace TodoApp.Application.Authentication.Commands.SignUp;
 public class SignUpCommandHandler : IRequestHandler<SignUpCommand, AuthenticationResult>
 {
 	private readonly IJwtTokenGenerator _jwtTokenGenerator;
-	private readonly IPasswordHasher _passwordHasher;
+	private readonly ICredentialsHasher _credentialsHasher;
 	private readonly IUserRepository _userRepository;
+	private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-	public SignUpCommandHandler(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository, IPasswordHasher passwordHasher)
+	public SignUpCommandHandler(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository, ICredentialsHasher credentialsHasher, IRefreshTokenRepository refreshTokenRepository)
 	{
 		_jwtTokenGenerator = jwtTokenGenerator;
 		_userRepository = userRepository;
-		_passwordHasher = passwordHasher;
+		_credentialsHasher = credentialsHasher;
+		_refreshTokenRepository = refreshTokenRepository;
 	}
 
 	public async Task<AuthenticationResult> Handle(SignUpCommand command, CancellationToken cancellationToken)
 	{
-		if (_userRepository.GetUserByEmail(command.Email) is not null)
+		if (await _userRepository.GetUserByEmail(command.Email) is not null)
 		{
 			throw new DuplicateEmailException();
 		}
 
 		//create user
-		var hashResult = _passwordHasher.HashPassword(command.Password);
-		var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+		var passwordHash = _credentialsHasher.Hash(command.Password);
 		
 		var user = new User()
 		{
@@ -37,18 +38,25 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, Authenticatio
 			FirstName = command.FirstName,
 			LastName = command.LastName,
 			Email = command.Email,
-			Password = hashResult.hash,
-			Salt =  hashResult.salt,
-			RefreshToken = refreshToken.Token,
-			RefreshTokenExpiryDate = refreshToken.ExpiryDate
+			Password = passwordHash.hash,
+			Salt =  passwordHash.salt,
 		};
 		
-		//persist user
-		_userRepository.CreateUser(user);
-		
-		//generate jwt token
-		var jwtToken = _jwtTokenGenerator.GenerateToken(user);
-		
-		return new AuthenticationResult(user, jwtToken);
+		// generate tokens
+		var accessToken = _jwtTokenGenerator.GenerateToken(user);
+		var refreshToken = _jwtTokenGenerator.GenerateRefreshToken(user.Id);
+		var plaintextRefreshToken = refreshToken.Token;
+		var hashedRefreshToken = _credentialsHasher.Hash(refreshToken.Token);
+
+		refreshToken.Token = hashedRefreshToken.hash;
+		refreshToken.Salt = hashedRefreshToken.salt;
+
+		//persist user and their refresh token
+		await _userRepository.CreateUser(user);
+		await _refreshTokenRepository.CreateRefreshToken(refreshToken);
+
+		refreshToken.Token = plaintextRefreshToken;
+
+		return new AuthenticationResult(user, accessToken, refreshToken.Token);
 	}
 }

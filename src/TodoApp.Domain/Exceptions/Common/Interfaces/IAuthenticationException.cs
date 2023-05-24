@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace TodoApp.Domain.Exceptions.User.Authentication;
+namespace TodoApp.Domain.Exceptions.Common.Interfaces;
 
 public interface IAuthenticationException
 {

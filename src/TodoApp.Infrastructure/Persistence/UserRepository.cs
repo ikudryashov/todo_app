@@ -1,3 +1,6 @@
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using Npgsql;
 using TodoApp.Application.Common.Interfaces.Persistence;
 using TodoApp.Domain.Entities;
 
@@ -5,35 +8,77 @@ namespace TodoApp.Infrastructure.Persistence;
 
 public class UserRepository : IUserRepository
 {
-	private static readonly List<User> Users = new();
-	public User? GetUserByEmail(string email)
+	private readonly string _connectionString;
+
+	public UserRepository(IConfiguration configuration)
 	{
-		return Users.SingleOrDefault(user => user.Email == email);
+		_connectionString = configuration.GetSection("Database")["ConnectionString"]!;
 	}
 
-	public User? GetUserByRefreshToken(string refreshToken)
+	public async Task<User?> GetUserByEmail(string email)
 	{
-		return Users.SingleOrDefault(user => user.RefreshToken == refreshToken);
+		await using var connection = new NpgsqlConnection(_connectionString);
+		var user = (await connection.QueryAsync<User>
+		(@"SELECT
+			id as Id,
+			first_name as FirstName,
+			last_name as LastName,
+			email as Email,
+			password as Password,
+			salt as Salt
+			FROM users WHERE email=@Email", new { Email = email }))
+			.AsList()
+			.FirstOrDefault();
+		return user;
 	}
 
-	public void CreateUser(User user)
+	public async Task<User?> GetUserById(Guid id)
 	{
-		Users.Add(user);
+		await using var connection = new NpgsqlConnection(_connectionString);
+		var user = (await connection.QueryAsync<User>
+			(@"SELECT
+			id as Id,
+			first_name as FirstName,
+			last_name as LastName,
+			email as Email,
+			password as Password,
+			salt as Salt
+			FROM users WHERE id=@Id", new { Id = id }))
+			.AsList()
+			.FirstOrDefault();
+		return user;
 	}
 
-	public void UpdateUser(User user)
+	public async Task CreateUser(User user)
 	{
-		var prevUser = Users.SingleOrDefault(prev => prev.Email == user.Email);
-		if (prevUser is not null)
-		{
-			prevUser.Id = user.Id;
-			prevUser.FirstName = user.FirstName;
-			prevUser.LastName = user.LastName;
-			prevUser.Email = user.Email;
-			prevUser.Password = user.Password;
-			prevUser.Salt = user.Salt;
-			prevUser.RefreshToken = user.RefreshToken;
-			prevUser.RefreshTokenExpiryDate = user.RefreshTokenExpiryDate;
-		}
+		await using var connection = new NpgsqlConnection(_connectionString);
+		await connection.ExecuteAsync(
+			@"INSERT INTO users (    
+                id, 
+				first_name, 
+				last_name, 
+				email, 
+				password, 
+				salt)
+				VALUES (
+				@Id,
+				@FirstName,
+				@LastName,
+				@Email,
+				@Password,
+				@Salt)", user);
+	}
+
+	public async Task UpdateUser(User user)
+	{
+		await using var connection = new NpgsqlConnection(_connectionString);
+		await connection.ExecuteAsync(
+			@"UPDATE users SET
+				first_name = @FirstName,
+				last_name = @LastName,
+				email = @Email,
+				password = @Password,
+				salt = @Salt
+				WHERE id = @Id", user);
 	}
 }
