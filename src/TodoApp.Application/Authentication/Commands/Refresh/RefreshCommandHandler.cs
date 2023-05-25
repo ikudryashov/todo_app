@@ -4,6 +4,7 @@ using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Persistence;
 using TodoApp.Application.Common.Interfaces.Services;
 using TodoApp.Domain.Exceptions.RefreshToken.Authentication;
+using TodoApp.Domain.Exceptions.User;
 
 namespace TodoApp.Application.Authentication.Commands.Refresh;
 
@@ -41,7 +42,12 @@ public class RefreshCommandHandler : IRequestHandler<RefreshCommand, Authenticat
 
 		var user = await _userRepository.GetUserById(refreshToken.UserId);
 
-		//generate tokens
+		if (user is null)
+		{
+			throw new UserNotFoundException();
+		}
+
+			//generate tokens
 		var accessToken = _jwtTokenGenerator.GenerateToken(user);
 		var newRefreshToken = _jwtTokenGenerator.GenerateRefreshToken(user.Id);
 		

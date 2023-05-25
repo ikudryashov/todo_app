@@ -26,25 +26,11 @@ public class LogOutCommandHandler : IRequestHandler<LogOutCommand>
 	{
 		var refreshToken = await _refreshTokenRepository.GetRefreshTokenByUserId(command.UserId);
 
-		if (refreshToken is null 
-		    || !refreshToken.IsValid
-		    || !_credentialsHasher.Verify(command.RefreshToken, refreshToken.Token, refreshToken.Salt))
+		if (refreshToken is null)
 		{
 			throw new InvalidTokenException();
 		}
-
-		if (refreshToken.ExpiryDate < _dateTimeProvider.UtcNow)
-		{
-			throw new ExpiredTokenException();
-		}
-
-		var user = await _userRepository.GetUserById(refreshToken.UserId);
-
-		if (user is null)
-		{
-			throw new UserNotFoundException();
-		}
-
+		
 		refreshToken.IsValid = false;
 
 		await _refreshTokenRepository.UpdateRefreshToken(refreshToken);

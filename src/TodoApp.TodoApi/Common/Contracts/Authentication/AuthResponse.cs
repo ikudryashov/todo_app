@@ -1,4 +1,4 @@
-namespace TodoApp.TodoApi.Contracts.Authentication;
+namespace TodoApp.TodoApi.Common.Contracts.Authentication;
 
 public record AuthResponse(
 		Guid UserId,

@@ -1,71 +1,75 @@
 using System.Security.Claims;
+using Mapster;
+using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TodoApp.Application.Authentication.Commands.LogOut;
 using TodoApp.Application.Authentication.Commands.Refresh;
 using TodoApp.Application.Authentication.Commands.SignUp;
-using TodoApp.Application.Authentication.Common;
 using TodoApp.Application.Authentication.Queries.LogIn;
 using TodoApp.Domain.Exceptions.User.Authentication;
-using TodoApp.TodoApi.Contracts.Authentication;
+using TodoApp.TodoApi.Common.Contracts.Authentication;
 
 namespace TodoApp.TodoApi.Controllers;
 
 [ApiController]
-[AllowAnonymous]
 public class AuthenticationController : ControllerBase
 {
 	private readonly IMediator _mediator;
+	private readonly IMapper _mapper;
 
-	public AuthenticationController(IMediator mediator)
+	public AuthenticationController(IMediator mediator, IMapper mapper)
 	{
 		_mediator = mediator;
+		_mapper = mapper;
 	}
 
 	[HttpPost("/auth/signup")]
+	[AllowAnonymous]
 	public async Task<IActionResult> SignUp(SignUpRequest request)
 	{
-		var command = new SignUpCommand(
-			request.FirstName,
-			request.LastName,
-			request.Email,
-			request.Password);
+		var command = _mapper.Map<SignUpCommand>(request);
 
 		var authResult = await _mediator.Send(command);
+		var response = _mapper.Map<AuthResponse>(authResult);
 
-		return Ok(authResult);
+		return Ok(response);
 	}
 	
 	[HttpPost("/auth/login")]
+	[AllowAnonymous]
 	public async Task<IActionResult> LogIn(LogInRequest request)
 	{
-		var query = new LogInQuery(request.Email, request.Password);
+		var query = _mapper.Map<LogInQuery>(request);
+		
 		var authResult = await _mediator.Send(query);
-
-		return Ok(authResult);
+		var response = _mapper.Map<AuthResponse>(authResult);
+		
+		return Ok(response);
 	}
 
 	[HttpPost("/auth/refresh")]
+	[AllowAnonymous]
 	public async Task<IActionResult> RefreshToken([FromBody] RefreshRequest request)
 	{
 		var context = HttpContext;
-		var claimedId = GetUserId(context);
+		var claimedId = Guid.Parse(GetUserId(context));
 
-		var command = new RefreshCommand(Guid.Parse(claimedId), request.RefreshToken);
-		
+		var command = (claimedId, request).Adapt<RefreshCommand>();
 		var authResult = await _mediator.Send(command);
+		var response = _mapper.Map<AuthResponse>(authResult);
 		
-		return Ok(authResult);
+		return Ok(response);
 	}
 
 	[HttpPost("/auth/logout")]
-	public async Task<IActionResult> LogOut([FromBody] LogOutRequest request)
+	public async Task<IActionResult> LogOut()
 	{
 		var context = HttpContext;
-		var claimedId = GetUserId(context);
+		var claimedId = Guid.Parse(GetUserId(context));
 
-		var command = new LogOutCommand(Guid.Parse(claimedId), request.RefreshToken);
+		var command = new LogOutCommand(claimedId);
 		await _mediator.Send(command);
 
 		return NoContent();

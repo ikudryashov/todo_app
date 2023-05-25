@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using TodoApp.Application;
 using TodoApp.Infrastructure;
+using TodoApp.TodoApi.Common.Mapping;
 using TodoApp.TodoApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services.AddControllers();
 	builder.Services.AddEndpointsApiExplorer();
 	builder.Services.AddSwaggerGen();
+	builder.Services.AddMappings();
 	builder.Services.AddApplication();
 	builder.Services.AddInfrastructure(builder.Configuration);
 	

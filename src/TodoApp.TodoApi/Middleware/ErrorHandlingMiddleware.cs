@@ -31,10 +31,7 @@ public class ErrorHandlingMiddleware
 		{
 			IAuthenticationException authException => (
 				"Authentication failed", (int)authException.StatusCode, authException.ErrorMessage),
-			
-			IUserException userException => (
-				"User not found.", (int)userException.StatusCode, userException.ErrorMessage),
-			
+
 			_ => ("Internal Server Error", StatusCodes.Status500InternalServerError, 
 				"Unexpected error occured. Please try again later.")
 		};
