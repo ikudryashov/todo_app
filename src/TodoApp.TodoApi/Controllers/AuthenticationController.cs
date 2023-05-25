@@ -34,9 +34,7 @@ public class AuthenticationController : ControllerBase
 
 		var authResult = await _mediator.Send(command);
 
-		var response = MapAuthenticationResult(authResult);
-		
-		return Ok(response);
+		return Ok(authResult);
 	}
 	
 	[HttpPost("/auth/login")]
@@ -45,9 +43,7 @@ public class AuthenticationController : ControllerBase
 		var query = new LogInQuery(request.Email, request.Password);
 		var authResult = await _mediator.Send(query);
 
-		var response = MapAuthenticationResult(authResult);
-		
-		return Ok(response);
+		return Ok(authResult);
 	}
 
 	[HttpPost("/auth/refresh")]
@@ -60,8 +56,7 @@ public class AuthenticationController : ControllerBase
 		
 		var authResult = await _mediator.Send(command);
 		
-		var response = MapAuthenticationResult(authResult);
-		return Ok(response);
+		return Ok(authResult);
 	}
 
 	[HttpPost("/auth/logout")]
@@ -75,18 +70,7 @@ public class AuthenticationController : ControllerBase
 
 		return NoContent();
 	}
-
-	private AuthResponse MapAuthenticationResult(AuthenticationResult result)
-	{
-		return new AuthResponse(
-			result.User.Id,
-			result.User.FirstName,
-			result.User.LastName,
-			result.User.Email,
-			result.AccessToken,
-			result.RefreshToken
-		);
-	}
+	
 	
 	private string GetUserId(HttpContext context)
 	{
@@ -94,5 +78,4 @@ public class AuthenticationController : ControllerBase
 		if (subClaim?.Value is null) throw new InvalidCredentialsException();
 		return subClaim.Value;
 	}
-	
 }

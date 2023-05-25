@@ -45,18 +45,17 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, Authenticatio
 		// generate tokens
 		var accessToken = _jwtTokenGenerator.GenerateToken(user);
 		var refreshToken = _jwtTokenGenerator.GenerateRefreshToken(user.Id);
-		var plaintextRefreshToken = refreshToken.Token;
-		var hashedRefreshToken = _credentialsHasher.Hash(refreshToken.Token);
 
+		// form result
+		var result = new AuthenticationResult(user.Id, accessToken, refreshToken.Token);
+		
+		//persist user and their refresh token
+		var hashedRefreshToken = _credentialsHasher.Hash(refreshToken.Token);
 		refreshToken.Token = hashedRefreshToken.hash;
 		refreshToken.Salt = hashedRefreshToken.salt;
-
-		//persist user and their refresh token
 		await _userRepository.CreateUser(user);
 		await _refreshTokenRepository.CreateRefreshToken(refreshToken);
 
-		refreshToken.Token = plaintextRefreshToken;
-
-		return new AuthenticationResult(user, accessToken, refreshToken.Token);
+		return result;
 	}
 }

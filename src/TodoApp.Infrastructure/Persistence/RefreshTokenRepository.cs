@@ -58,14 +58,6 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 				salt = @Salt,
 				expiry_date = @ExpiryDate,
 				is_valid = @IsValid
-				WHERE user_id = @UserId", 
-			new
-			{
-				Token = refreshToken.Token,
-				Salt = refreshToken.Salt,
-				ExpiryDate = refreshToken.ExpiryDate,
-				IsValid = refreshToken.IsValid,
-				UserId = refreshToken.UserId
-			});
+				WHERE user_id = @UserId", refreshToken);
 	}
 }

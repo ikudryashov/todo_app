@@ -33,20 +33,16 @@ public class LogInQueryHandler : IRequestHandler<LogInQuery, AuthenticationResul
 		//generate tokens
 		var accessToken = _jwtTokenGenerator.GenerateToken(user);
 		var refreshToken = _jwtTokenGenerator.GenerateRefreshToken(user.Id);
-		
-		var plaintextRefreshToken = refreshToken.Token;
-		var hashedRefreshToken = _credentialsHasher.Hash(refreshToken.Token);
 
+		//form result
+		var result = new AuthenticationResult(user.Id, accessToken, refreshToken.Token);
+		
+		//update refresh token
+		var hashedRefreshToken = _credentialsHasher.Hash(refreshToken.Token);
 		refreshToken.Token = hashedRefreshToken.hash;
 		refreshToken.Salt = hashedRefreshToken.salt;
-		
 		await _refreshTokenRepository.UpdateRefreshToken(refreshToken);
 
-		refreshToken.Token = plaintextRefreshToken;
-		
-		return new AuthenticationResult(
-			user, 
-			accessToken,
-			refreshToken.Token);
+		return result;
 	}
 }
