@@ -1,6 +1,8 @@
+using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using TodoApp.Domain.Exceptions.Common.Interfaces;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using TodoApp.Application.Common.Exceptions;
 
 namespace TodoApp.TodoApi.Middleware;
 
@@ -25,30 +27,74 @@ public class ErrorHandlingMiddleware
 		}
 	}
 
-	private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+	private static Task HandleExceptionAsync(HttpContext context, Exception exception)
 	{
-		var (title, status, detail) = exception switch
+		var problemDetails = exception switch
 		{
-			IAuthenticationException authException => (
-				"Authentication failed", (int)authException.StatusCode, authException.ErrorMessage),
-
-			_ => ("Internal Server Error", StatusCodes.Status500InternalServerError, 
-				"Unexpected error occured. Please try again later.")
+			ApiException apiException => HandleApiException(context, apiException),
+			RequestValidationException validationException => HandleValidationException(context, validationException),
+			_ => HandleGenericException(context)
 		};
-
-		var problemDetails = new ProblemDetails()
-		{
-			Instance = context.Request?.Path,
-			Status = status,
-			Detail = detail,
-			Title = title,
-		};
-
-		context.Response.StatusCode = problemDetails.Status.Value;
+		
+		context.Response.StatusCode = problemDetails.Status!.Value;
 		context.Response.ContentType = "application/problem+json";
+		
+		var serializerOptions = new JsonSerializerOptions
+		{
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		};
 
-		var result =  JsonSerializer.Serialize(problemDetails);
+		string result = String.Empty;
 
-		await context.Response.WriteAsync(result);
+		if (problemDetails is ValidationProblemDetails)
+		{
+			result = JsonSerializer.Serialize(problemDetails as ValidationProblemDetails, serializerOptions);
+		}
+		else
+		{
+			result = JsonSerializer.Serialize(problemDetails, serializerOptions);
+		}
+		
+		return context.Response.WriteAsync(result);
+	}
+
+	private static ProblemDetails HandleGenericException(HttpContext context)
+	{
+		return new ProblemDetails
+		{			
+			Title = "Internal Server Error",
+			Detail = "An unexpected error occured. Please try again later.",
+			Status = (int)HttpStatusCode.InternalServerError,
+			Instance = context.Request.Path,
+		};
+	}
+
+	private static ProblemDetails HandleValidationException(HttpContext context, RequestValidationException exception)
+	{
+		var modelStateDictionary = new ModelStateDictionary();
+		
+		foreach (var failure in exception.Failures)
+		{
+			modelStateDictionary.AddModelError(failure.PropertyName, failure.ErrorMessage);
+		}
+
+		return new ValidationProblemDetails(modelStateDictionary)
+		{
+			Title = exception.Title,
+			Detail = exception.Detail,
+			Status = (int)exception.StatusCode,
+			Instance = context.Request.Path,
+		};
+	}
+
+	private static ProblemDetails HandleApiException(HttpContext context, ApiException exception)
+	{
+		return new ProblemDetails
+		{
+			Title = exception.Title,
+			Detail = exception.Detail,
+			Status = (int)exception.StatusCode,
+			Instance = context.Request.Path,
+		};
 	}
 }

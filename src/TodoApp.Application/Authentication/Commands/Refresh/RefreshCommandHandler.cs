@@ -1,10 +1,10 @@
+using System.Net;
 using MediatR;
 using TodoApp.Application.Authentication.Common;
+using TodoApp.Application.Common.Exceptions;
 using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Persistence;
 using TodoApp.Application.Common.Interfaces.Services;
-using TodoApp.Domain.Exceptions.RefreshToken.Authentication;
-using TodoApp.Domain.Exceptions.User;
 
 namespace TodoApp.Application.Authentication.Commands.Refresh;
 
@@ -28,26 +28,34 @@ public class RefreshCommandHandler : IRequestHandler<RefreshCommand, Authenticat
 	{
 		var refreshToken = await _refreshTokenRepository.GetRefreshTokenByUserId(command.UserId);
 
-		if (refreshToken is null 
-		    || !refreshToken.IsValid
+		if (refreshToken is null)
+		{
+			throw new ApiException("Failed to authenticate.",
+				"Refresh token not found.", HttpStatusCode.Unauthorized);
+		}
+
+		if (!refreshToken.IsValid
 		    || !_credentialsHasher.Verify(command.RefreshToken, refreshToken.Token, refreshToken.Salt))
 		{
-			throw new InvalidTokenException();
+			throw new ApiException("Failed to authenticate.",
+				"Refresh token is invalid.", HttpStatusCode.BadRequest);
 		}
 
 		if (refreshToken.ExpiryDate < _dateTimeProvider.UtcNow)
 		{
-			throw new ExpiredTokenException();
+			throw new ApiException("Failed to authenticate.",
+				"Refresh token expired, please log in.", HttpStatusCode.Unauthorized);
 		}
 
 		var user = await _userRepository.GetUserById(refreshToken.UserId);
 
 		if (user is null)
 		{
-			throw new UserNotFoundException();
+			throw new ApiException("Failed to authenticate.",
+				"User not found.", HttpStatusCode.Unauthorized);
 		}
 
-			//generate tokens
+		//generate tokens
 		var accessToken = _jwtTokenGenerator.GenerateToken(user);
 		var newRefreshToken = _jwtTokenGenerator.GenerateRefreshToken(user.Id);
 		

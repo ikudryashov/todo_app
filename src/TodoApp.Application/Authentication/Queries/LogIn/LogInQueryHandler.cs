@@ -1,9 +1,10 @@
+using System.Net;
 using MediatR;
 using TodoApp.Application.Authentication.Common;
+using TodoApp.Application.Common.Exceptions;
 using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Persistence;
 using TodoApp.Domain.Entities;
-using TodoApp.Domain.Exceptions.User.Authentication;
 
 namespace TodoApp.Application.Authentication.Queries.LogIn;
 
@@ -27,7 +28,9 @@ public class LogInQueryHandler : IRequestHandler<LogInQuery, AuthenticationResul
 		if (await _userRepository.GetUserByEmail(query.Email) is not User user ||
 		    !_credentialsHasher.Verify(query.Password, user.Password, user.Salt))
 		{
-			throw new InvalidCredentialsException();
+			throw new ApiException("Failed to authenticate.",
+				"User does not exist or provided invalid credentials.",
+				HttpStatusCode.BadRequest);
 		}
 
 		//generate tokens

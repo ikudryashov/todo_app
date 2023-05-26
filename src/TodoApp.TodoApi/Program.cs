@@ -45,12 +45,13 @@ var app = builder.Build();
 		app.UseSwaggerUI();
 	}
 	
-	
-	app.UseMiddleware<ErrorHandlingMiddleware>();
+
 	app.UseAuthentication();
 	app.UseHttpsRedirection();
 	app.UseAuthorization();
 	app.MapControllers();
+	app.UseMiddleware<ErrorHandlingMiddleware>();
+	
 }
 
 app.Run();

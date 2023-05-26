@@ -1,25 +1,17 @@
+using System.Net;
 using MediatR;
-using TodoApp.Application.Common.Interfaces.Authentication;
+using TodoApp.Application.Common.Exceptions;
 using TodoApp.Application.Common.Interfaces.Persistence;
-using TodoApp.Application.Common.Interfaces.Services;
-using TodoApp.Domain.Exceptions.RefreshToken.Authentication;
-using TodoApp.Domain.Exceptions.User;
 
 namespace TodoApp.Application.Authentication.Commands.LogOut;
 
 public class LogOutCommandHandler : IRequestHandler<LogOutCommand>
 {
 	private readonly IRefreshTokenRepository _refreshTokenRepository;
-	private readonly IUserRepository _userRepository;
-	private readonly IDateTimeProvider _dateTimeProvider;
-	private readonly ICredentialsHasher _credentialsHasher;
 
-	public LogOutCommandHandler(IRefreshTokenRepository refreshTokenRepository, IUserRepository userRepository, IDateTimeProvider dateTimeProvider, ICredentialsHasher credentialsHasher)
+	public LogOutCommandHandler(IRefreshTokenRepository refreshTokenRepository)
 	{
 		_refreshTokenRepository = refreshTokenRepository;
-		_userRepository = userRepository;
-		_dateTimeProvider = dateTimeProvider;
-		_credentialsHasher = credentialsHasher;
 	}
 
 	public async Task Handle(LogOutCommand command, CancellationToken cancellationToken)
@@ -28,7 +20,8 @@ public class LogOutCommandHandler : IRequestHandler<LogOutCommand>
 
 		if (refreshToken is null)
 		{
-			throw new InvalidTokenException();
+			throw new ApiException("Failed to authenticate.",
+				"Refresh token not found.", HttpStatusCode.Unauthorized);
 		}
 		
 		refreshToken.IsValid = false;

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Claims;
 using Mapster;
 using MapsterMapper;
@@ -8,7 +9,7 @@ using TodoApp.Application.Authentication.Commands.LogOut;
 using TodoApp.Application.Authentication.Commands.Refresh;
 using TodoApp.Application.Authentication.Commands.SignUp;
 using TodoApp.Application.Authentication.Queries.LogIn;
-using TodoApp.Domain.Exceptions.User.Authentication;
+using TodoApp.Application.Common.Exceptions;
 using TodoApp.TodoApi.Common.Contracts.Authentication;
 
 namespace TodoApp.TodoApi.Controllers;
@@ -79,7 +80,10 @@ public class AuthenticationController : ControllerBase
 	private string GetUserId(HttpContext context)
 	{
 		var subClaim = context.User.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
-		if (subClaim?.Value is null) throw new InvalidCredentialsException();
+		if (subClaim?.Value is null) throw new ApiException(
+			"Failed to authenticate",
+			"Invalid access credentials.", 
+			HttpStatusCode.Unauthorized);
 		return subClaim.Value;
 	}
 }

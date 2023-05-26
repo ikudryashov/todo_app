@@ -1,9 +1,10 @@
+using System.Net;
 using MediatR;
 using TodoApp.Application.Authentication.Common;
+using TodoApp.Application.Common.Exceptions;
 using TodoApp.Application.Common.Interfaces.Authentication;
 using TodoApp.Application.Common.Interfaces.Persistence;
 using TodoApp.Domain.Entities;
-using TodoApp.Domain.Exceptions.User.Authentication;
 
 namespace TodoApp.Application.Authentication.Commands.SignUp;
 
@@ -26,7 +27,8 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, Authenticatio
 	{
 		if (await _userRepository.GetUserByEmail(command.Email) is not null)
 		{
-			throw new DuplicateEmailException();
+			throw new ApiException("Failed to authenticate",
+				"User with this email already exists.", HttpStatusCode.BadRequest);
 		}
 
 		//create user
