@@ -81,4 +81,12 @@ public class UserRepository : IUserRepository
 				salt = @Salt
 				WHERE id = @Id", user);
 	}
+	
+	public async Task DeleteUser(Guid id)
+	{
+		await using var connection = new NpgsqlConnection(_connectionString);
+		await connection.ExecuteAsync(
+			@"DELETE FROM users
+				WHERE id = @Id", new { Id = id });
+	}
 }

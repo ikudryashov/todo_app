@@ -1,4 +1,3 @@
-using TodoApp.Domain.Entities;
 
 namespace TodoApp.Application.Authentication.Common;
 

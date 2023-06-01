@@ -38,7 +38,7 @@ public class AuthenticationController : ControllerBase
 		return Ok(response);
 	}
 	
-	[HttpPost("/auth/login")]
+	[HttpPost("api/auth/login")]
 	[AllowAnonymous]
 	public async Task<IActionResult> LogIn(LogInRequest request)
 	{
@@ -50,7 +50,7 @@ public class AuthenticationController : ControllerBase
 		return Ok(response);
 	}
 
-	[HttpPost("/auth/refresh")]
+	[HttpPost("api/auth/refresh")]
 	[AllowAnonymous]
 	public async Task<IActionResult> RefreshToken([FromBody] RefreshRequest request)
 	{
@@ -64,7 +64,7 @@ public class AuthenticationController : ControllerBase
 		return Ok(response);
 	}
 
-	[HttpPost("/auth/logout")]
+	[HttpPost("api/auth/logout")]
 	public async Task<IActionResult> LogOut()
 	{
 		var context = HttpContext;
