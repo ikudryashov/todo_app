@@ -26,7 +26,7 @@ public class AuthenticationController : ControllerBase
 		_mapper = mapper;
 	}
 
-	[HttpPost("/auth/signup")]
+	[HttpPost("api/auth/signup")]
 	[AllowAnonymous]
 	public async Task<IActionResult> SignUp(SignUpRequest request)
 	{
