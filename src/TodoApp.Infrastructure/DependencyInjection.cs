@@ -18,6 +18,7 @@ public static class DependencyInjection
 		services.Configure<JwtTokenOptions>(configuration.GetSection(JwtTokenOptions.ConfigSectionName));
 		services.AddScoped<IUserRepository, UserRepository>();
 		services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+		services.AddScoped<ITodoRepository, TodoRepository>();
 		services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 		services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 		services.AddSingleton<ICredentialsHasher, CredentialsHasher>();

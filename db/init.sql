@@ -25,4 +25,17 @@ CREATE TABLE refresh_tokens (
         REFERENCES users(id)
           ON DELETE CASCADE
 );
+
+-- Create todos table
+CREATE TABLE todos (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    description VARCHAR(1000),
+    due_date TIMESTAMP,
+    CONSTRAINT fk_user
+      FOREIGN KEY(user_id)
+        REFERENCES users(id)
+          ON DELETE CASCADE
+);
 COMMIT;

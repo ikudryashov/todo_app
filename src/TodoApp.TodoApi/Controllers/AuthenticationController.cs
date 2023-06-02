@@ -55,9 +55,9 @@ public class AuthenticationController : ControllerBase
 	public async Task<IActionResult> RefreshToken([FromBody] RefreshRequest request)
 	{
 		var context = HttpContext;
-		var claimedId = Guid.Parse(GetUserId(context));
+		var userId = GetUserId(context);
 
-		var command = (claimedId, request).Adapt<RefreshCommand>();
+		var command = (userId, request).Adapt<RefreshCommand>();
 		var authResult = await _mediator.Send(command);
 		var response = _mapper.Map<AuthResponse>(authResult);
 		
@@ -68,22 +68,22 @@ public class AuthenticationController : ControllerBase
 	public async Task<IActionResult> LogOut()
 	{
 		var context = HttpContext;
-		var claimedId = Guid.Parse(GetUserId(context));
+		var userId = GetUserId(context);
 
-		var command = new LogOutCommand(claimedId);
+		var command = new LogOutCommand(userId);
 		await _mediator.Send(command);
 
 		return NoContent();
 	}
 	
 	
-	private string GetUserId(HttpContext context)
+	private Guid GetUserId(HttpContext context)
 	{
 		var subClaim = context.User.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
 		if (subClaim?.Value is null) throw new ApiException(
 			"Failed to authenticate",
 			"Invalid access credentials.", 
 			HttpStatusCode.Unauthorized);
-		return subClaim.Value;
+		return Guid.Parse(subClaim.Value);
 	}
 }
