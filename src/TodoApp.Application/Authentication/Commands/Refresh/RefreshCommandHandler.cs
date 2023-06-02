@@ -31,7 +31,7 @@ public class RefreshCommandHandler : IRequestHandler<RefreshCommand, Authenticat
 		if (refreshToken is null)
 		{
 			throw new ApiException("Failed to authenticate.",
-				"Refresh token not found.", HttpStatusCode.Unauthorized);
+				"Refresh token not found.", HttpStatusCode.NotFound);
 		}
 
 		if (!refreshToken.IsValid

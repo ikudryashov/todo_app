@@ -7,4 +7,4 @@ public record UpdateUserCommand(
 		string FirstName,
 		string LastName,
 		string Email
-) : IRequest;
+) : IRequest<Unit>;

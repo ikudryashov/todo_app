@@ -6,7 +6,7 @@ using TodoApp.Domain.Entities;
 
 namespace TodoApp.Application.Users.Commands.Delete;
 
-public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand>
+public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
 {
 	private readonly IUserRepository _userRepository;
 
@@ -15,7 +15,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand>
 		_userRepository = userRepository;
 	}
 
-	public async Task Handle(DeleteUserCommand command, CancellationToken cancellationToken)
+	public async Task<Unit> Handle(DeleteUserCommand command, CancellationToken cancellationToken)
 	{
 		if (await _userRepository.GetUserById(command.Id) is not User user)
 		{
@@ -23,5 +23,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand>
 		}
 
 		await _userRepository.DeleteUser(command.Id);
+		
+		return Unit.Value;
 	}
 }
