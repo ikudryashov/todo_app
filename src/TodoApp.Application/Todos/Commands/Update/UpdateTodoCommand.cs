@@ -7,5 +7,6 @@ public record UpdateTodoCommand(
 		Guid UserId,
 		string Title,
 		string? Description,
-		DateTime? DueDate
+		DateTime? DueDate,
+		bool IsComplete
 	) : IRequest<Unit>;

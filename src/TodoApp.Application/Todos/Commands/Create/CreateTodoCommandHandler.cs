@@ -31,11 +31,12 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, TodoR
 			UserId = command.UserId,
 			Title = command.Title,
 			Description = command.Description,
-			DueDate = command.DueDate
+			DueDate = command.DueDate,
+			IsComplete = command.IsComplete
 		};
 
 		await _todoRepository.CreateTodo(todo);
 
-		return new TodoResult(todo.Id, todo.Title, todo.Description, todo.DueDate);
+		return new TodoResult(todo.Id, todo.Title, todo.Description, todo.DueDate, todo.IsComplete);
 	}
 }

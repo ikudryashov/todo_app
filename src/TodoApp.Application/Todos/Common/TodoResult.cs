@@ -4,5 +4,6 @@ public record TodoResult(
 		Guid Id,
 		string Title,
 		string? Description,
-		DateTime? DueDate
+		DateTime? DueDate,
+		bool IsComplete
 	);

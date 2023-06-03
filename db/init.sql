@@ -33,6 +33,7 @@ CREATE TABLE todos (
     title VARCHAR(100) NOT NULL,
     description VARCHAR(1000),
     due_date TIMESTAMP,
+    is_complete BOOLEAN,
     CONSTRAINT fk_user
       FOREIGN KEY(user_id)
         REFERENCES users(id)

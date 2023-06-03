@@ -41,7 +41,8 @@ public class UpdateTodoCommandHandler : IRequestHandler<UpdateTodoCommand, Unit>
 			UserId = todo.UserId,
 			Title = command.Title,
 			Description = command.Description,
-			DueDate = command.DueDate
+			DueDate = command.DueDate,
+			IsComplete = command.IsComplete
 		};
 
 		await _todoRepository.UpdateTodo(updatedTodo);

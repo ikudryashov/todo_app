@@ -22,7 +22,8 @@ public class TodoRepository : ITodoRepository
 				  user_id as UserId,
 				  title as Title,
 				  description as Description,
-				  due_date as DueDate
+				  due_date as DueDate,
+				  is_complete as IsComplete
 				  FROM todos WHERE user_id=@Id", new { Id = userId })).AsList();
 
 		return todos!;
@@ -36,7 +37,8 @@ public class TodoRepository : ITodoRepository
 				  user_id as UserId,
 				  title as Title,
 				  description as Description,
-				  due_date as DueDate
+				  due_date as DueDate,
+				  is_complete as IsComplete
 				  FROM todos WHERE id=@TodoId", new { TodoId = todoId })).AsList().FirstOrDefault();
 
 		return todo;
@@ -47,9 +49,9 @@ public class TodoRepository : ITodoRepository
 		await using var connection = new NpgsqlConnection(_connectionString);
 		await connection.ExecuteAsync(
 			@"INSERT INTO todos
-				(id, user_id, title, description, due_date)
+				(id, user_id, title, description, due_date, is_complete)
     			VALUES
-    			(@Id, @UserId, @Title, @Description, @DueDate)", todo);
+    			(@Id, @UserId, @Title, @Description, @DueDate, @IsComplete)", todo);
 	}
 
 	public async Task UpdateTodo(Todo todo)
@@ -57,7 +59,8 @@ public class TodoRepository : ITodoRepository
 		await using var connection = new NpgsqlConnection(_connectionString);
 		await connection.ExecuteAsync(
 			@"UPDATE todos SET
-				title = @Title, description = @Description, due_date = @DueDate WHERE id = @Id", todo);
+				title = @Title, description = @Description, due_date = @DueDate, is_complete = @IsComplete
+             	WHERE id = @Id", todo);
 	}
 
 	public async Task DeleteTodo(Guid todoId)

@@ -8,5 +8,6 @@ public record CreateTodoCommand(
 		Guid UserId,
 		string Title,
 		string? Description,
-		DateTime? DueDate
+		DateTime? DueDate,
+		bool IsComplete
 	) : IRequest<TodoResult>;
