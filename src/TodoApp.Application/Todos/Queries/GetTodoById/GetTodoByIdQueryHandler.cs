@@ -2,11 +2,12 @@ using System.Net;
 using MediatR;
 using TodoApp.Application.Common.Exceptions;
 using TodoApp.Application.Common.Interfaces.Persistence;
+using TodoApp.Application.Todos.Common;
 using TodoApp.Domain.Entities;
 
 namespace TodoApp.Application.Todos.Queries.GetTodoById;
 
-public class GetTodoByIdQueryHandler : IRequestHandler<GetTodoByIdQuery, Todo>
+public class GetTodoByIdQueryHandler : IRequestHandler<GetTodoByIdQuery, TodoResult>
 {
 	private readonly IUserRepository _userRepository;
 	private readonly ITodoRepository _todoRepository;
@@ -17,9 +18,9 @@ public class GetTodoByIdQueryHandler : IRequestHandler<GetTodoByIdQuery, Todo>
 		_todoRepository = todoRepository;
 	}
 
-	public async Task<Todo> Handle(GetTodoByIdQuery query, CancellationToken cancellationToken)
+	public async Task<TodoResult> Handle(GetTodoByIdQuery query, CancellationToken cancellationToken)
 	{
-		if (await _userRepository.GetUserById(query.UserId) is null)
+		if (await _userRepository.GetUserById(query.UserId) is not User user)
 		{
 			throw new ApiException("Not Found", "User does not exist.", HttpStatusCode.NotFound);
 		}
@@ -29,6 +30,12 @@ public class GetTodoByIdQueryHandler : IRequestHandler<GetTodoByIdQuery, Todo>
 			throw new ApiException("Not Found", "Todo does not exist.", HttpStatusCode.NotFound);
 		}
 
-		return todo;
+		if (todo.UserId != user.Id)
+		{
+			throw new ApiException("Unauthorized", "You do not have access to this resource.",
+				HttpStatusCode.Unauthorized);
+		}
+
+		return new TodoResult(todo.Id, todo.Title, todo.Description, todo.DueDate);
 	}
 }

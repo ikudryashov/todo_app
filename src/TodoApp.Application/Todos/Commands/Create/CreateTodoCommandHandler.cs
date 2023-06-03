@@ -2,11 +2,12 @@ using System.Net;
 using MediatR;
 using TodoApp.Application.Common.Exceptions;
 using TodoApp.Application.Common.Interfaces.Persistence;
+using TodoApp.Application.Todos.Common;
 using TodoApp.Domain.Entities;
 
 namespace TodoApp.Application.Todos.Commands.Create;
 
-public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Todo>
+public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, TodoResult>
 {
 	private readonly ITodoRepository _todoRepository;
 	private readonly IUserRepository _userRepository;
@@ -17,7 +18,7 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Todo>
 		_userRepository = userRepository;
 	}
 
-	public async Task<Todo> Handle(CreateTodoCommand command, CancellationToken cancellationToken)
+	public async Task<TodoResult> Handle(CreateTodoCommand command, CancellationToken cancellationToken)
 	{
 		if (await _userRepository.GetUserById(command.UserId) is null)
 		{
@@ -35,7 +36,6 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Todo>
 
 		await _todoRepository.CreateTodo(todo);
 
-		return todo;
-
+		return new TodoResult(todo.Id, todo.Title, todo.Description, todo.DueDate);
 	}
 }

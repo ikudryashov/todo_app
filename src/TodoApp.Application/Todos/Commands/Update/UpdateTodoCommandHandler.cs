@@ -19,7 +19,7 @@ public class UpdateTodoCommandHandler : IRequestHandler<UpdateTodoCommand, Unit>
 
 	public async Task<Unit> Handle(UpdateTodoCommand command, CancellationToken cancellationToken)
 	{
-		if (await _userRepository.GetUserById(command.UserId) is null)
+		if (await _userRepository.GetUserById(command.UserId) is not User user)
 		{
 			throw new ApiException("Not Found", "User does not exist.", HttpStatusCode.NotFound);
 		}
@@ -27,6 +27,12 @@ public class UpdateTodoCommandHandler : IRequestHandler<UpdateTodoCommand, Unit>
 		if (await _todoRepository.GetTodoById(command.Id) is not Todo todo)
 		{
 			throw new ApiException("Not Found", "Todo does not exist.", HttpStatusCode.NotFound);
+		}
+
+		if (todo.UserId != user.Id)
+		{
+			throw new ApiException("Unauthorized", "You do not have access to this resource.",
+				HttpStatusCode.Unauthorized);
 		}
 
 		var updatedTodo = new Todo

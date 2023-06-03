@@ -1,15 +1,12 @@
 using System.Net;
 using System.Security.Claims;
-using MapsterMapper;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TodoApp.Application.Common.Exceptions;
-using TodoApp.Application.Todos.Commands;
 using TodoApp.Application.Todos.Commands.Create;
 using TodoApp.Application.Todos.Commands.Delete;
 using TodoApp.Application.Todos.Commands.Update;
-using TodoApp.Application.Todos.Queries;
 using TodoApp.Application.Todos.Queries.GetTodoById;
 using TodoApp.Application.Todos.Queries.GetTodos;
 using TodoApp.TodoApi.Common.Contracts.Todos;
@@ -56,7 +53,7 @@ public class TodosController : ControllerBase
 		var command = (userId, request).Adapt<CreateTodoCommand>();
 		var response = await _mediator.Send(command);
 
-		return Ok(response);
+		return Created(nameof(GetTodoById), response);
 	}
 	
 	[HttpPut("api/todos/{todoId:guid}")]
@@ -90,5 +87,4 @@ public class TodosController : ControllerBase
 			HttpStatusCode.Unauthorized);
 		return Guid.Parse(subClaim.Value);
 	}
-	
 }

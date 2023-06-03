@@ -1,4 +1,5 @@
 using MediatR;
+using TodoApp.Application.Todos.Common;
 using TodoApp.Domain.Entities;
 
 namespace TodoApp.Application.Todos.Commands.Create;
@@ -8,4 +9,4 @@ public record CreateTodoCommand(
 		string Title,
 		string? Description,
 		DateTime? DueDate
-	) : IRequest<Todo>;
+	) : IRequest<TodoResult>;

@@ -25,25 +25,19 @@ public class UsersController : ControllerBase
 	public async Task<IActionResult> GetUser(Guid id)
 	{
 		var context = HttpContext;
-		if (!ValidateUserId(id, context))
-			throw new ApiException("Unauthorized", "You do not have access to this resource",
-				HttpStatusCode.Unauthorized);
+		ValidateUserId(id, context);
 		
 		var query = new GetUserQuery(id);
 		var response = await _mediator.Send(query);
 		
 		return Ok(response);
 	}
-
-
-
+	
 	[HttpPut("/api/users/{id}")]
 	public async Task<IActionResult> UpdateUser(Guid id, [FromBody]UpdateUserRequest request)
 	{
 		var context = HttpContext;
-		if (!ValidateUserId(id, context))
-			throw new ApiException("Unauthorized", "You do not have access to this resource",
-				HttpStatusCode.Unauthorized);
+		ValidateUserId(id, context);
 		
 		var command = (id, request).Adapt<UpdateUserCommand>();
 		await _mediator.Send(command);
@@ -55,20 +49,22 @@ public class UsersController : ControllerBase
 	public async Task<IActionResult> DeleteUser(Guid id)
 	{
 		var context = HttpContext;
-		if (!ValidateUserId(id, context))
-			throw new ApiException("Unauthorized", "You do not have access to this resource",
-				HttpStatusCode.Unauthorized);
+		ValidateUserId(id, context);
 		
 		var command = new DeleteUserCommand(id);
 		await _mediator.Send(command);
 		
 		return NoContent();
 	}
-	private bool ValidateUserId(Guid id, HttpContext context)
+	private void ValidateUserId(Guid id, HttpContext context)
     {
 	    var subClaim = context.User.Claims.FirstOrDefault(
 		    claim => claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
 
-	    return (string.Equals(id.ToString(), subClaim!.Value));
+	    if (!string.Equals(id.ToString(), subClaim!.Value))
+	    {
+		    throw new ApiException("Unauthorized", "You do not have access to this resource",
+			    HttpStatusCode.Unauthorized);
+	    }
     }
 }
