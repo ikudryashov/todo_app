@@ -9,4 +9,5 @@ The Refresh Token entity represents a refresh token issued to a User.
 | ExpiryDate | DateTime | Timestamp on which date and time the Token expires.           |
 | IsValid    | Bool     | Flag representing whether the token has been revoked/expired. |
 
+All fields are required to not be empty or null for Refresh Token entity.
 Only Refresh Token's value is accessible via the API.

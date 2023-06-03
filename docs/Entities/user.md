@@ -10,4 +10,5 @@ The User entity represents a user registered in the app.
 | Password   | string  | The hashed password for the user.                        |
 | Salt       | string  | The salt used for password hashing.                      |
 
+All fields are required to not be empty or null for User entity.
 User's password and salt are not accessible via the API.
