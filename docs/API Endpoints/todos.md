@@ -23,7 +23,8 @@ This endpoint retrieves all todos of a user.
       "id": "string",
       "title": "string",
       "description": "string",
-      "dueDate": "string"
+      "dueDate": "string",
+      "isComplete": "bool"
     }
 ]
 ```
@@ -45,7 +46,8 @@ This endpoint retrieves a todo with specified Id.
   "id": "string",
   "title": "string",
   "description": "string",
-  "dueDate": "string"
+  "dueDate": "string",
+  "isComplete": "bool"
 }
 ```
 This endpoint returns **404 Not Found** response if:
@@ -66,7 +68,8 @@ This endpoint allows user to create a new todo.
 {
   "title": "string",
   "description": "string",
-  "dueDate": "string"
+  "dueDate": "string",
+  "isComplete": "bool"
 }
 ```
 
@@ -79,7 +82,8 @@ This endpoint allows user to create a new todo.
   "id": "string",
   "title": "string",
   "description": "string",
-  "dueDate": "string"
+  "dueDate": "string",
+  "isComplete": "bool"
 }
 ```
 This endpoint returns **400 Bad Request** response if:
@@ -97,7 +101,8 @@ This endpoint allows to edit a todo with specified id.
 {
   "title": "string",
   "description": "string",
-  "dueDate": "string"
+  "dueDate": "string",
+  "isComplete": "bool"
 }
 ```
 
