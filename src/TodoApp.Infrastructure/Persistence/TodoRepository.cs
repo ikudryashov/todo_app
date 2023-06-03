@@ -14,7 +14,7 @@ public class TodoRepository : ITodoRepository
 	{
 		_connectionString = configuration.GetSection("Database")["ConnectionString"]!;
 	}
-	public async Task<List<Todo>?> GetTodos(Guid userId)
+	public async Task<List<Todo?>> GetTodos(Guid userId)
 	{
 		await using var connection = new NpgsqlConnection(_connectionString);
 		var todos = (await connection.QueryAsync<Todo>(
@@ -25,7 +25,7 @@ public class TodoRepository : ITodoRepository
 				  due_date as DueDate
 				  FROM todos WHERE user_id=@Id", new { Id = userId })).AsList();
 
-		return todos;
+		return todos!;
 	}
 
 	public async Task<Todo?> GetTodoById(Guid todoId)
