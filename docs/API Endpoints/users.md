@@ -47,14 +47,8 @@ This endpoint allows to edit user's data.
 
 **Response:**
 
-```json
-{
-  "Id": "string",
-  "FirstName": "string",
-  "LastName": "string",
-  "Email": "string"
-}
-```
+**204 No Content**
+
 This endpoint returns **404 Not Found** response if:
 - The user with given id does not exist
 

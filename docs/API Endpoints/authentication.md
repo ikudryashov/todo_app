@@ -8,7 +8,7 @@ This API is used for user authentication actions:
 
 ## Endpoints
 
-### POST api/auth/signup
+### POST: api/auth/signup
 
 This endpoint allows a new user to sign up.
 
@@ -38,7 +38,7 @@ This endpoint returns **400 Bad Request** response if:
 - The user with given email already exists
 - At least one request field failed validation
 
-### POST api/auth/login
+### POST: api/auth/login
 
 This endpoint allows an existing user to log in.
 
@@ -68,7 +68,7 @@ This endpoint returns **400 Bad Request** response if:
 - Provided password is incorrect
 - At least one request field failed validation
 
-### POST api/auth/refresh
+### POST: api/auth/refresh
 
 This endpoint allows an existing user refresh their expired access token.
 
@@ -95,10 +95,12 @@ This endpoint returns **404 Not Found** response if:
 - Provided refresh token does not exist
 
 **403 Unauthorized** response if:
-- Provided refresh token is itself expired or invalidated
-- User's id is not found in the expired access token
+- Provided refresh token is itself expired
 
-### POST api/auth/logout
+**401 Bad Request** response if:
+- Provided refresh token is invalid or invalidated
+
+### POST: api/auth/logout
 
 This endpoint allows an existing user to invalidate their refresh token.
 
