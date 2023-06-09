@@ -1,0 +1,21 @@
+﻿services:
+  todoapp.todoapi:
+    image: todo_app_api
+    build:
+      context: .
+      dockerfile: src/TodoApp.TodoApi/Dockerfile
+    ports:
+      - 7054:443
+
+  todoapp.db:
+    image: postgres:latest
+    container_name: todoapp_postgres_db
+    environment:
+      - POSTGRES_DB=todo_app_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=todo_app_db
+    volumes:
+      - ./.containers/database:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432

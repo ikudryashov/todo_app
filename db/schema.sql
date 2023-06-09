@@ -1,6 +1,3 @@
-CREATE DATABASE todo_app_db;
-\c todo_app_db
-
 BEGIN;
 
 -- Create users table
