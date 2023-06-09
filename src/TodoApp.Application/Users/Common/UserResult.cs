@@ -5,4 +5,4 @@ public record UserResult(
 		string FirstName,
 		string LastName,
 		string Email
-	);
+);

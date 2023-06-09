@@ -17,6 +17,12 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Unit>
 
 	public async Task<Unit> Handle(UpdateUserCommand command, CancellationToken cancellationToken)
 	{
+		if (command.Id != command.RequestId)
+		{
+			throw new ApiException("Unauthorized", "You do not have access to this resource.",
+				HttpStatusCode.Unauthorized);
+		}
+		
 		if (await _userRepository.GetUserById(command.Id) is not User user)
 		{
 			throw new ApiException("Not found", "User does not exist.", HttpStatusCode.NotFound);

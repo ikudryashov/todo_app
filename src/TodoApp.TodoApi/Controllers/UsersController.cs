@@ -1,9 +1,8 @@
-using System.Net;
 using System.Security.Claims;
 using Mapster;
+using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TodoApp.Application.Common.Exceptions;
 using TodoApp.Application.Users.Commands.Delete;
 using TodoApp.Application.Users.Commands.Update;
 using TodoApp.Application.Users.Queries;
@@ -15,20 +14,23 @@ namespace TodoApp.TodoApi.Controllers;
 public class UsersController : ControllerBase
 {
 	private readonly IMediator _mediator;
+	private readonly IMapper _mapper;
 
-	public UsersController(IMediator mediator)
+	public UsersController(IMediator mediator, IMapper mapper)
 	{
 		_mediator = mediator;
+		_mapper = mapper;
 	}
 
 	[HttpGet("/api/users/{id}")]
 	public async Task<IActionResult> GetUser(Guid id)
 	{
 		var context = HttpContext;
-		ValidateUserId(id, context);
+		var userId = GetUserId(context);
 		
-		var query = new GetUserQuery(id);
-		var response = await _mediator.Send(query);
+		var query = new GetUserQuery(id, userId);
+		var result = await _mediator.Send(query);
+		var response = _mapper.Map<UserResponse>(result);
 		
 		return Ok(response);
 	}
@@ -37,9 +39,9 @@ public class UsersController : ControllerBase
 	public async Task<IActionResult> UpdateUser(Guid id, [FromBody]UpdateUserRequest request)
 	{
 		var context = HttpContext;
-		ValidateUserId(id, context);
+		var userId = GetUserId(context);
 		
-		var command = (id, request).Adapt<UpdateUserCommand>();
+		var command = (id, userId, request).Adapt<UpdateUserCommand>();
 		await _mediator.Send(command);
 		
 		return NoContent();
@@ -49,22 +51,18 @@ public class UsersController : ControllerBase
 	public async Task<IActionResult> DeleteUser(Guid id)
 	{
 		var context = HttpContext;
-		ValidateUserId(id, context);
+		var userId = GetUserId(context);
 		
-		var command = new DeleteUserCommand(id);
+		var command = new DeleteUserCommand(id, userId);
 		await _mediator.Send(command);
 		
 		return NoContent();
 	}
-	private void ValidateUserId(Guid id, HttpContext context)
-    {
-	    var subClaim = context.User.Claims.FirstOrDefault(
-		    claim => claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
-
-	    if (!string.Equals(id.ToString(), subClaim!.Value))
-	    {
-		    throw new ApiException("Unauthorized", "You do not have access to this resource",
-			    HttpStatusCode.Unauthorized);
-	    }
-    }
+	private Guid GetUserId(HttpContext context)
+	{
+		var subClaim = context.User.Claims
+			.FirstOrDefault(claim => 
+				claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
+		return Guid.Parse(subClaim!.Value);
+	}
 }

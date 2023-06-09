@@ -36,6 +36,6 @@ public class GetTodoByIdQueryHandler : IRequestHandler<GetTodoByIdQuery, TodoRes
 				HttpStatusCode.Unauthorized);
 		}
 
-		return new TodoResult(todo.Id, todo.Title, todo.Description, todo.DueDate, todo.IsComplete);
+		return new TodoResult(todo.Id, todo.UserId, todo.Title, todo.Description, todo.DueDate, todo.IsComplete);
 	}
 }

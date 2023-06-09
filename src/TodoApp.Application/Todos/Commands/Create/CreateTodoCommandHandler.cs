@@ -37,6 +37,6 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, TodoR
 
 		await _todoRepository.CreateTodo(todo);
 
-		return new TodoResult(todo.Id, todo.Title, todo.Description, todo.DueDate, todo.IsComplete);
+		return new TodoResult(todo.Id, todo.UserId, todo.Title, todo.Description, todo.DueDate, todo.IsComplete);
 	}
 }

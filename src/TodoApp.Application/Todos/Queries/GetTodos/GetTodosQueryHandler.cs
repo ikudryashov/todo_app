@@ -32,7 +32,7 @@ public class GetTodosQueryHandler : IRequestHandler<GetTodosQuery, List<TodoResu
 		{
 			if (todo is not null)
 			{
-				result.Add(new TodoResult(todo.Id, todo.Title, todo.Description, todo.DueDate, todo.IsComplete));
+				result.Add(new TodoResult(todo.Id, todo.UserId, todo.Title, todo.Description, todo.DueDate, todo.IsComplete));
 			}
 		}
 

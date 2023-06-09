@@ -1,9 +1,8 @@
-using System.Net;
 using System.Security.Claims;
 using Mapster;
+using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TodoApp.Application.Common.Exceptions;
 using TodoApp.Application.Todos.Commands.Create;
 using TodoApp.Application.Todos.Commands.Delete;
 using TodoApp.Application.Todos.Commands.Update;
@@ -17,10 +16,12 @@ namespace TodoApp.TodoApi.Controllers;
 public class TodosController : ControllerBase
 {
 	private readonly IMediator _mediator;
+	private readonly IMapper _mapper;
 
-	public TodosController(IMediator mediator)
+	public TodosController(IMediator mediator, IMapper mapper)
 	{
 		_mediator = mediator;
+		_mapper = mapper;
 	}
 
 	[HttpGet("api/todos/")]
@@ -29,7 +30,8 @@ public class TodosController : ControllerBase
 		var context = HttpContext;
 		var userId = GetUserId(context);
 		var query = new GetTodosQuery(userId);
-		var response = await _mediator.Send(query);
+		var result = await _mediator.Send(query);
+		var response = _mapper.Map<List<TodoResponse>>(result);
 
 		return Ok(response);
 	}
@@ -40,7 +42,8 @@ public class TodosController : ControllerBase
 		var context = HttpContext;
 		var userId = GetUserId(context);
 		var query = new GetTodoByIdQuery(todoId, userId);
-		var response = await _mediator.Send(query);
+		var result = await _mediator.Send(query);
+		var response = _mapper.Map<TodoResponse>(result);
 
 		return Ok(response);
 	}
@@ -51,8 +54,9 @@ public class TodosController : ControllerBase
 		var context = HttpContext;
 		var userId = GetUserId(context);
 		var command = (userId, request).Adapt<CreateTodoCommand>();
-		var response = await _mediator.Send(command);
-
+		var result = await _mediator.Send(command);
+		var response = _mapper.Map<TodoResponse>(result);
+		
 		return Created(nameof(GetTodoById), response);
 	}
 	
@@ -80,11 +84,9 @@ public class TodosController : ControllerBase
 
 	private Guid GetUserId(HttpContext context)
 	{
-		var subClaim = context.User.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
-		if (subClaim?.Value is null) throw new ApiException(
-			"Failed to authenticate",
-			"Invalid access credentials.", 
-			HttpStatusCode.Unauthorized);
-		return Guid.Parse(subClaim.Value);
+		var subClaim = context.User.Claims
+			.FirstOrDefault(claim => 
+				claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
+		return Guid.Parse(subClaim!.Value);
 	}
 }
