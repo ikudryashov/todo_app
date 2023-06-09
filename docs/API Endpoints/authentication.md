@@ -29,9 +29,9 @@ This endpoint allows a new user to sign up.
 
 ```json
 {
-  "UserId": "string",
-  "AccessToken": "string",
-  "RefreshToken": "string"
+  "userId": "string",
+  "accessToken": "string",
+  "refreshToken": "string"
 }
 ```
 This endpoint returns **400 Bad Request** response if:
@@ -57,9 +57,9 @@ This endpoint allows an existing user to log in.
 
 ```json
 {
-  "UserId": "string",
-  "AccessToken": "string",
-  "RefreshToken": "string"
+  "userId": "string",
+  "accessToken": "string",
+  "refreshToken": "string"
 }
 ```
 
@@ -86,9 +86,9 @@ This endpoint allows an existing user refresh their expired access token.
 
 ```json
 {
-  "UserId": "string",
-  "AccessToken": "string",
-  "RefreshToken": "string"
+  "userId": "string",
+  "accessToken": "string",
+  "refreshToken": "string"
 }
 ```
 This endpoint returns **404 Not Found** response if:

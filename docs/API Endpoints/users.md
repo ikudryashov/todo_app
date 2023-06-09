@@ -17,10 +17,10 @@ This endpoint retrieves a user with specified Id.
 
 ```json
 {
-  "Id": "string",
-  "FirstName": "string",
-  "LastName": "string",
-  "Email": "string"
+  "id": "string",
+  "firstName": "string",
+  "lastName": "string",
+  "email": "string"
 }
 ```
 This endpoint returns **404 Not Found** response if:
