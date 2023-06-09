@@ -1,3 +1,5 @@
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using TodoApp.Application;
 using TodoApp.Infrastructure;
 using TodoApp.TodoApi;
@@ -18,6 +20,10 @@ var app = builder.Build();
 {
 	app.UseAuthentication();
 	app.UseHttpsRedirection();
+	app.MapHealthChecks("/health", new HealthCheckOptions
+	{
+		ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+	});
 	app.UseAuthorization();
 	app.MapControllers();
 	app.UseMiddleware<ErrorHandlingMiddleware>();

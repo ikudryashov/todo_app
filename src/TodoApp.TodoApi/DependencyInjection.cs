@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using TodoApp.TodoApi.Health;
 
 namespace TodoApp.TodoApi;
 
@@ -28,6 +29,10 @@ public static class DependencyInjection
 					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("JwtTokenOptions:SecretKey")!))
 				};
 			});
+
+		services.AddHealthChecks()
+			.AddCheck<DatabaseHealthCheck>("Database");
+		
 		return services;
 	}
 }
