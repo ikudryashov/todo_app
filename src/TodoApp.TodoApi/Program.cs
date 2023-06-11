@@ -19,7 +19,7 @@ var app = builder.Build();
 
 {
 	app.UseAuthentication();
-	app.UseHttpsRedirection();
+	// app.UseHttpsRedirection();
 	app.MapHealthChecks("/health", new HealthCheckOptions
 	{
 		ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse

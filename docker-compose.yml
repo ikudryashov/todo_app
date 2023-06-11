@@ -6,6 +6,7 @@
       dockerfile: src/TodoApp.TodoApi/Dockerfile
     ports:
       - 7054:443
+      - 5208:80
 
   todoapp.db:
     image: postgres:latest
