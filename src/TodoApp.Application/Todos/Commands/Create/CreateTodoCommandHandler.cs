@@ -22,7 +22,8 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, TodoR
 	{
 		if (await _userRepository.GetUserById(command.UserId) is null)
 		{
-			throw new ApiException("Not Found", "User does not exist.", HttpStatusCode.NotFound);
+			throw new ApiException("Not Found", "User does not exist.", nameof(CreateTodoCommand),
+				HttpStatusCode.NotFound);
 		}
 
 		var todo = new Todo

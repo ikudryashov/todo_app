@@ -9,10 +9,12 @@ namespace TodoApp.TodoApi.Middleware;
 public class ErrorHandlingMiddleware
 {
 	private readonly RequestDelegate _next;
+	private readonly ILogger<ErrorHandlingMiddleware> _logger;
 
-	public ErrorHandlingMiddleware(RequestDelegate next)
+	public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
 	{
 		_next = next;
+		_logger = logger;
 	}
 
 	public async Task Invoke(HttpContext context)
@@ -27,13 +29,13 @@ public class ErrorHandlingMiddleware
 		}
 	}
 
-	private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+	private Task HandleExceptionAsync(HttpContext context, Exception exception)
 	{
 		var problemDetails = exception switch
 		{
 			ApiException apiException => HandleApiException(context, apiException),
 			RequestValidationException validationException => HandleValidationException(context, validationException),
-			_ => HandleGenericException(context)
+			_ => HandleGenericException(context, exception)
 		};
 		
 		context.Response.StatusCode = problemDetails.Status!.Value;
@@ -46,9 +48,9 @@ public class ErrorHandlingMiddleware
 
 		string result = String.Empty;
 
-		if (problemDetails is ValidationProblemDetails)
+		if (problemDetails is ValidationProblemDetails details)
 		{
-			result = JsonSerializer.Serialize(problemDetails as ValidationProblemDetails, serializerOptions);
+			result = JsonSerializer.Serialize(details, serializerOptions);
 		}
 		else
 		{
@@ -58,8 +60,11 @@ public class ErrorHandlingMiddleware
 		return context.Response.WriteAsync(result);
 	}
 
-	private static ProblemDetails HandleGenericException(HttpContext context)
+	private ProblemDetails HandleGenericException(HttpContext context, Exception exception)
 	{
+		_logger.LogError("Request failure: {@Error}, {@DateTimeUTC}",
+				exception.Message, DateTime.UtcNow);
+		
 		return new ProblemDetails
 		{			
 			Title = "Internal Server Error",
@@ -69,8 +74,11 @@ public class ErrorHandlingMiddleware
 		};
 	}
 
-	private static ProblemDetails HandleValidationException(HttpContext context, RequestValidationException exception)
+	private ProblemDetails HandleValidationException(HttpContext context, RequestValidationException exception)
 	{
+		_logger.LogError("Request failure: {@RequestName}, {@Error}, {@DateTimeUTC}",
+			exception.Request, exception.Detail, DateTime.UtcNow);
+		
 		var modelStateDictionary = new ModelStateDictionary();
 		
 		foreach (var failure in exception.Failures)
@@ -87,8 +95,11 @@ public class ErrorHandlingMiddleware
 		};
 	}
 
-	private static ProblemDetails HandleApiException(HttpContext context, ApiException exception)
+	private ProblemDetails HandleApiException(HttpContext context, ApiException exception)
 	{
+		_logger.LogError("Request failure: {@RequestName}, {@Error}, {@DateTimeUTC}",
+			exception.Request, exception.Detail, DateTime.UtcNow);
+		
 		return new ProblemDetails
 		{
 			Title = exception.Title,

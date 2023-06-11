@@ -28,7 +28,7 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, Authenticatio
 		if (await _userRepository.GetUserByEmail(command.Email) is not null)
 		{
 			throw new ApiException("Failed to authenticate",
-				"User with this email already exists.", HttpStatusCode.BadRequest);
+				"User with this email already exists.", nameof(SignUpCommand), HttpStatusCode.BadRequest);
 		}
 
 		//create user

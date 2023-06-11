@@ -29,7 +29,7 @@ public class LogInQueryHandler : IRequestHandler<LogInQuery, AuthenticationResul
 		    !_credentialsHasher.Verify(query.Password, user.Password, user.Salt))
 		{
 			throw new ApiException("Failed to authenticate.",
-				"User does not exist or provided invalid credentials.",
+				"User does not exist or provided invalid credentials.", nameof(LogInQuery),
 				HttpStatusCode.BadRequest);
 		}
 

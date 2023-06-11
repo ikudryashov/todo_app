@@ -20,12 +20,13 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Unit>
 		if (command.Id != command.RequestId)
 		{
 			throw new ApiException("Unauthorized", "You do not have access to this resource.",
-				HttpStatusCode.Unauthorized);
+				nameof(UpdateUserCommand), HttpStatusCode.Unauthorized);
 		}
 		
 		if (await _userRepository.GetUserById(command.Id) is not User user)
 		{
-			throw new ApiException("Not found", "User does not exist.", HttpStatusCode.NotFound);
+			throw new ApiException("Not found", "User does not exist.", nameof(UpdateUserCommand),
+				HttpStatusCode.NotFound);
 		}
 
 		var updatedUser = new User

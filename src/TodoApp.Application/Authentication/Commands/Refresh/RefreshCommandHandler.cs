@@ -31,20 +31,20 @@ public class RefreshCommandHandler : IRequestHandler<RefreshCommand, Authenticat
 		if (refreshToken is null)
 		{
 			throw new ApiException("Failed to authenticate.",
-				"Refresh token not found.", HttpStatusCode.NotFound);
+				"Refresh token not found.", nameof(RefreshCommand), HttpStatusCode.NotFound);
 		}
 
 		if (!refreshToken.IsValid
 		    || !_credentialsHasher.Verify(command.RefreshToken, refreshToken.Token, refreshToken.Salt))
 		{
 			throw new ApiException("Failed to authenticate.",
-				"Refresh token is invalid.", HttpStatusCode.BadRequest);
+				"Refresh token is invalid.", nameof(RefreshCommand), HttpStatusCode.BadRequest);
 		}
 
 		if (refreshToken.ExpiryDate < _dateTimeProvider.UtcNow)
 		{
 			throw new ApiException("Failed to authenticate.",
-				"Refresh token expired, please log in.", HttpStatusCode.Unauthorized);
+				"Refresh token expired, please log in.", nameof(RefreshCommand), HttpStatusCode.Unauthorized);
 		}
 
 		var user = await _userRepository.GetUserById(refreshToken.UserId);
@@ -52,7 +52,7 @@ public class RefreshCommandHandler : IRequestHandler<RefreshCommand, Authenticat
 		if (user is null)
 		{
 			throw new ApiException("Failed to authenticate.",
-				"User not found.", HttpStatusCode.Unauthorized);
+				"User not found.", nameof(RefreshCommand), HttpStatusCode.Unauthorized);
 		}
 
 		//generate tokens

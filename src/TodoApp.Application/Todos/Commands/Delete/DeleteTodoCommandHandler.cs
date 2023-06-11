@@ -21,18 +21,20 @@ public class DeleteTodoCommandHandler : IRequestHandler<DeleteTodoCommand, Unit>
 	{
 		if (await _userRepository.GetUserById(command.UserId) is not User user)
 		{
-			throw new ApiException("Not Found", "User does not exist.", HttpStatusCode.NotFound);
+			throw new ApiException("Not Found", "User does not exist.", nameof(DeleteTodoCommand),
+				HttpStatusCode.NotFound);
 		}
 
 		if (await _todoRepository.GetTodoById(command.Id) is not Todo todo)
 		{
-			throw new ApiException("Not Found", "Todo does not exist.", HttpStatusCode.NotFound);
+			throw new ApiException("Not Found", "Todo does not exist.", nameof(DeleteTodoCommand), 
+				HttpStatusCode.NotFound);
 		}
 		
 		if (todo.UserId != user.Id)
 		{
 			throw new ApiException("Unauthorized", "You do not have access to this resource.",
-				HttpStatusCode.Unauthorized);
+				nameof(DeleteTodoCommand), HttpStatusCode.Unauthorized);
 		}
 
 

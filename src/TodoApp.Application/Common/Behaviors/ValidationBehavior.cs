@@ -32,6 +32,7 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
 
 		throw new RequestValidationException("Invalid request.",
 			"One or more request validation errors occured.",
+			typeof(TRequest).Name,
 			HttpStatusCode.BadRequest,
 			validationResult.Errors.ToList());
 	}

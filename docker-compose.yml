@@ -7,7 +7,9 @@
     ports:
       - 7054:443
       - 5208:80
-
+    volumes:
+      - ./.containers/logs:/logs
+  
   todoapp.db:
     image: postgres:latest
     container_name: todoapp_postgres_db

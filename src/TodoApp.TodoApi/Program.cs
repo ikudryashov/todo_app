@@ -1,5 +1,6 @@
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Serilog;
 using TodoApp.Application;
 using TodoApp.Infrastructure;
 using TodoApp.TodoApi;
@@ -13,11 +14,17 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services.AddApplication();
 	builder.Services.AddInfrastructure(builder.Configuration);
 	builder.Services.AddApi(builder.Configuration);
+	builder.Host.UseSerilog((context, configuration) =>
+	{
+		configuration.ReadFrom.Configuration(context.Configuration);
+	});
 }
 
 var app = builder.Build();
 
 {
+	app.UseMiddleware<ErrorHandlingMiddleware>();
+	app.UseSerilogRequestLogging();
 	app.UseAuthentication();
 	// app.UseHttpsRedirection();
 	app.MapHealthChecks("/health", new HealthCheckOptions
@@ -26,7 +33,6 @@ var app = builder.Build();
 	});
 	app.UseAuthorization();
 	app.MapControllers();
-	app.UseMiddleware<ErrorHandlingMiddleware>();
 }
 
 app.Run();

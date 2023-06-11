@@ -22,7 +22,8 @@ public class GetTodosQueryHandler : IRequestHandler<GetTodosQuery, List<TodoResu
 	{
 		if (await _userRepository.GetUserById(query.UserId) is null)
 		{
-			throw new ApiException("Not Found", "User does not exist.", HttpStatusCode.NotFound);
+			throw new ApiException("Not Found", "User does not exist.", nameof(GetTodosQuery), 
+				HttpStatusCode.NotFound);
 		}
 		
 		var todos = await _todoRepository.GetTodos(query.UserId);

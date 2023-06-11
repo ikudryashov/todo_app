@@ -21,7 +21,7 @@ public class LogOutCommandHandler : IRequestHandler<LogOutCommand>
 		if (refreshToken is null)
 		{
 			throw new ApiException("Failed to authenticate.",
-				"Refresh token not found.", HttpStatusCode.NotFound);
+				"Refresh token not found.", nameof(LogOutCommand), HttpStatusCode.NotFound);
 		}
 		
 		refreshToken.IsValid = false;

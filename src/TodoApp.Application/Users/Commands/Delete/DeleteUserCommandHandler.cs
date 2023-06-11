@@ -19,13 +19,15 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
 	{
 		if (command.Id != command.RequestId)
 		{
-			throw new ApiException("Unauthorized", "You do not have access to this resource.",
+			throw new ApiException("Unauthorized", "You do not have access to this resource.", 
+				nameof(DeleteUserCommand),
 				HttpStatusCode.Unauthorized);
 		}
 		
 		if (await _userRepository.GetUserById(command.Id) is not User user)
 		{
-			throw new ApiException("Not found", "User does not exist", HttpStatusCode.NotFound);
+			throw new ApiException("Not found", "User does not exist", nameof(DeleteUserCommand), 
+				HttpStatusCode.NotFound);
 		}
 
 		await _userRepository.DeleteUser(command.Id);

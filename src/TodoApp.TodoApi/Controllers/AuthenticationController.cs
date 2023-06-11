@@ -79,11 +79,8 @@ public class AuthenticationController : ControllerBase
 	
 	private Guid GetUserId(HttpContext context)
 	{
-		var subClaim = context.User.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
-		if (subClaim?.Value is null) throw new ApiException(
-			"Failed to authenticate",
-			"Invalid access credentials.", 
-			HttpStatusCode.Unauthorized);
-		return Guid.Parse(subClaim.Value);
+		var subClaim = context.User.Claims.FirstOrDefault(
+			claim => claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
+		return Guid.Parse(subClaim!.Value);
 	}
 }

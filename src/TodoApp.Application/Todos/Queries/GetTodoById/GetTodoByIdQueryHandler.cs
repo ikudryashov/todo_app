@@ -22,17 +22,20 @@ public class GetTodoByIdQueryHandler : IRequestHandler<GetTodoByIdQuery, TodoRes
 	{
 		if (await _userRepository.GetUserById(query.UserId) is not User user)
 		{
-			throw new ApiException("Not Found", "User does not exist.", HttpStatusCode.NotFound);
+			throw new ApiException("Not Found", "User does not exist.", nameof(GetTodoByIdQuery),
+				HttpStatusCode.NotFound);
 		}
 
 		if (await _todoRepository.GetTodoById(query.Id) is not Todo todo)
 		{
-			throw new ApiException("Not Found", "Todo does not exist.", HttpStatusCode.NotFound);
+			throw new ApiException("Not Found", "Todo does not exist.", nameof(GetTodoByIdQuery),
+				HttpStatusCode.NotFound);
 		}
 
 		if (todo.UserId != user.Id)
 		{
-			throw new ApiException("Unauthorized", "You do not have access to this resource.",
+			throw new ApiException("Unauthorized", "You do not have access to this resource.", 
+				nameof(GetTodoByIdQuery),
 				HttpStatusCode.Unauthorized);
 		}
 

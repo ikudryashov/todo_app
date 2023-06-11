@@ -20,13 +20,15 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, UserResult>
 	{
 		if (query.Id != query.RequestId)
 		{
-			throw new ApiException("Unauthorized", "You do not have access to this resource.",
+			throw new ApiException("Unauthorized", "You do not have access to this resource.", 
+				nameof(GetUserQuery),
 				HttpStatusCode.Unauthorized);
 		}
 		
 		if (await _userRepository.GetUserById(query.Id) is not User user)
 		{
-			throw new ApiException("Not found", "User does not exist", HttpStatusCode.NotFound);
+			throw new ApiException("Not found", "User does not exist", nameof(GetUserQuery), 
+				HttpStatusCode.NotFound);
 		}
 
 		return new UserResult(user.Id, user.FirstName, user.LastName, user.Email);
