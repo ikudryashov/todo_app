@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
@@ -13,11 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services.AddMappings();
 	builder.Services.AddApplication();
 	builder.Services.AddInfrastructure(builder.Configuration);
-	builder.Services.AddApi(builder.Configuration);
-	builder.Host.UseSerilog((context, configuration) =>
-	{
-		configuration.ReadFrom.Configuration(context.Configuration);
-	});
+	builder.Services.AddApi(builder.Configuration, builder.Host);
 }
 
 var app = builder.Build();
@@ -32,6 +29,7 @@ var app = builder.Build();
 		ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 	});
 	app.UseAuthorization();
+	app.UseIpRateLimiting();
 	app.MapControllers();
 }
 
